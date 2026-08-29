@@ -1,0 +1,16 @@
+{
+  "name": "themitbro-project",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "razorpay": "^2.9.2"
+  },
+  "scripts": {
+    "check": "node --check api/create-order.js && node --check api/verify-payment.js && node --check api/download.js && node --check api/catalog.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
