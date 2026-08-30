@@ -14,12 +14,17 @@ export default async function handler(req, res) {
     const keySecret = process.env.RAZORPAY_KEY_SECRET;
 
     if (!keyId || !keySecret) {
-      console.error("Missing Razorpay environment variables");
+  console.error("Missing Razorpay environment variables", {
+    hasKeyId: Boolean(keyId),
+    hasKeySecret: Boolean(keySecret)
+  });
 
-      return res.status(500).json({
-        success: false,
-        message: "Payment service configuration is unavailable."
-      });
+  return res.status(500).json({
+    success: false,
+    message: "Payment service configuration is unavailable.",
+    hasKeyId: Boolean(keyId),
+    hasKeySecret: Boolean(keySecret)
+  });
     }
 
     const razorpay = new Razorpay({
