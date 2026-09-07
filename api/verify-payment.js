@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import Razorpay from "razorpay";
-import { getProduct } from "./_lib/catalog.js";
+import { getProduct, isPurchasable } from "./_lib/catalog.js";
 import { createDownloadToken } from "./_lib/download-token.js";
 const razorpay = new Razorpay({ key_id: process.env.RAZORPAY_KEY_ID, key_secret: process.env.RAZORPAY_KEY_SECRET });
 export default async function handler(req,res){
@@ -9,7 +9,7 @@ export default async function handler(req,res){
   const {razorpay_order_id,razorpay_payment_id,razorpay_signature,paperId}=req.body||{};
   if(!razorpay_order_id||!razorpay_payment_id||!razorpay_signature||!paperId) return res.status(400).json({success:false,message:"Missing payment details"});
   const product=getProduct(paperId);
-  if(!product || product.status!=="available" || !product.privateFile || product.priceRupees<=0) return res.status(400).json({success:false,message:"Invalid paper"});
+  if(!isPurchasable(product)) return res.status(400).json({success:false,message:"Invalid or unreleased paper"});
   const expected=crypto.createHmac("sha256",process.env.RAZORPAY_KEY_SECRET).update(`${razorpay_order_id}|${razorpay_payment_id}`).digest("hex");
   const a=Buffer.from(razorpay_signature), b=Buffer.from(expected);
   if(a.length!==b.length || !crypto.timingSafeEqual(a,b)) return res.status(400).json({success:false,message:"Payment verification failed"});
