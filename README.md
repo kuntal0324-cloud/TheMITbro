@@ -1,10 +1,12 @@
-# TheMITbro Website — Production Storefront
+# TheMITbro Website — GATE 2027 EE recovery build
 
-Static storefront + Vercel serverless API + Razorpay checkout. Paid PDFs live under `private/paper`, never `public/paper`. Product availability/pricing is controlled by `api/_lib/catalog.js`.
+Static storefront + Vercel serverless API + Razorpay checkout. The only active content scope is GATE 2027 Electrical Engineering. All 50 planned sets are `under_review`; payment and download are deliberately blocked.
+
+A paper may enter `private/releases` only after a matching immutable release manifest and named human signoff exist. Quarantined legacy files are not reachable from the catalog or API.
 
 See `SECURITY_AND_LAUNCH.md` before public launch.
 
 ## Repository boundaries
-- Website: commerce and delivery only.
+- Website: commerce and delivery only; branch-neutral product keys support future GATE paper codes.
 - Question Bank: original content and review/release manifests.
 - Formatter v2.0: validation, paper generation and publishing.

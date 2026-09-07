@@ -1,11 +1,52 @@
-export const PRODUCTS = Object.freeze({
-  GATE_EE_SET_A: { id: "GATE_EE_SET_A", title: "GATE EE — Free Sample Set A", exam: "GATE EE", priceRupees: 0, status: "available", publicPath: "/paper/GATE_EE_SET_A.pdf" },
-  GATE_EE_SET_B: { id: "GATE_EE_SET_B", title: "GATE EE — Mock Set B", exam: "GATE EE", priceRupees: 500, status: "available", privateFile: "GATE_EE_SET_B.pdf" },
-  GATE_EE_SET_C: { id: "GATE_EE_SET_C", title: "GATE EE — Mock Set C", exam: "GATE EE", priceRupees: 500, status: "available", privateFile: "GATE_EE_SET_C.pdf" },
-  JEE_MATHS_PREM_1: { id: "JEE_MATHS_PREM_1", title: "JEE Mathematics — Mock Set 1", exam: "JEE Mathematics", priceRupees: 500, status: "coming_soon" },
-  JEE_MATHS_PREM_2: { id: "JEE_MATHS_PREM_2", title: "JEE Mathematics — Mock Set 2", exam: "JEE Mathematics", priceRupees: 500, status: "coming_soon" },
-  JEE_PHYSICS_PREM_1: { id: "JEE_PHYSICS_PREM_1", title: "JEE Physics — Mock Set 1", exam: "JEE Physics", priceRupees: 500, status: "coming_soon" },
-  JEE_PHYSICS_PREM_2: { id: "JEE_PHYSICS_PREM_2", title: "JEE Physics — Mock Set 2", exam: "JEE Physics", priceRupees: 500, status: "coming_soon" },
+const PROGRAM = Object.freeze({
+  examFamily: "GATE",
+  examYear: 2027,
+  paperCode: "EE",
+  branch: "Electrical Engineering",
+  setCount: 50,
 });
-export function getProduct(id) { return PRODUCTS[id] || null; }
-export function publicCatalog() { return Object.values(PRODUCTS).map(({privateFile,...p}) => p); }
+
+function plannedProduct(setNumber) {
+  const number = String(setNumber).padStart(2, "0");
+  return Object.freeze({
+    id: `GATE_2027_EE_SET_${number}`,
+    title: `GATE 2027 EE — Mock Set ${number}`,
+    ...PROGRAM,
+    setNumber,
+    priceRupees: null,
+    status: "under_review",
+    releaseManifest: null,
+    privateFile: null,
+  });
+}
+
+// This shape is branch-neutral: add another program by constructing products
+// with a different paperCode/branch. GATE 2027 EE is the only active scope.
+export const PRODUCTS = Object.freeze(Object.fromEntries(
+  Array.from({ length: PROGRAM.setCount }, (_, index) => plannedProduct(index + 1))
+    .map(product => [product.id, product]),
+));
+
+export function getProduct(id) {
+  return PRODUCTS[id] || null;
+}
+
+export function isPurchasable(product) {
+  return Boolean(
+    product &&
+    product.status === "released" &&
+    product.releaseManifest &&
+    product.privateFile &&
+    Number.isInteger(product.priceRupees) &&
+    product.priceRupees > 0
+  );
+}
+
+export function publicCatalog() {
+  return Object.values(PRODUCTS).map(({ privateFile, releaseManifest, ...product }) => ({
+    ...product,
+    purchasable: isPurchasable({ ...product, privateFile, releaseManifest }),
+  }));
+}
+
+export const ACTIVE_PROGRAM = PROGRAM;

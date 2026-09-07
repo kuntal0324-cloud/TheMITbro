@@ -8,7 +8,7 @@
     "razorpay": "^2.9.2"
   },
   "scripts": {
-    "check": "node --check api/create-order.js && node --check api/verify-payment.js && node --check api/download.js && node --check api/catalog.js"
+    "check": "node --check api/create-order.js && node --check api/verify-payment.js && node --check api/download.js && node --check api/catalog.js && node --test"
   },
   "engines": {
     "node": ">=20"

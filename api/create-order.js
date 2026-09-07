@@ -1,5 +1,5 @@
 import Razorpay from "razorpay";
-import { getProduct } from "./_lib/catalog.js";
+import { getProduct, isPurchasable } from "./_lib/catalog.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -36,10 +36,7 @@ export default async function handler(req, res) {
     const product = getProduct(paperId);
 
     if (
-      !product ||
-      product.status !== "available" ||
-      !product.privateFile ||
-      product.priceRupees <= 0
+      !isPurchasable(product)
     ) {
       return res.status(400).json({
         success: false,
