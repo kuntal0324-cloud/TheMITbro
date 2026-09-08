@@ -20,3 +20,9 @@ Only then:
 - run `npm run check` and a controlled payment/download test.
 
 The same contract applies to future branches. Use a distinct paper code, syllabus map, blueprint, corpus and product IDs; never pool questions across branches by keyword alone.
+
+## Current upstream checkpoint — 2026-09-08
+
+The Question Bank currently contains 40 unique candidates across Batches 001 and 002. All 40 pass Formatter; 20 Batch 001 records are human-certified, paper-eligible and admitted, while all 20 Batch 002 records remain blocked pending named human final QA. No 65-question paper is complete, so all 50 catalog products correctly remain `under_review` and non-purchasable.
+
+The machine-checked snapshot is `private/production_state/GATE_2027_EE_UPSTREAM_CHECKPOINT.json`. It is a deployment guard, not release authorization; every future checkpoint change must arrive with its matching immutable Question Bank and Formatter evidence.
