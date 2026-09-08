@@ -6,6 +6,8 @@ A paper may enter `private/releases` only after a matching immutable release man
 
 See `SECURITY_AND_LAUNCH.md` before public launch.
 
+Current upstream position (2026-09-08): 40 unique candidates are in the production program, 20 are human-certified and paper-eligible, and zero complete sets exist. The catalog therefore remains fully blocked. See `private/production_state/GATE_2027_EE_UPSTREAM_CHECKPOINT.json`.
+
 ## Repository boundaries
 - Website: commerce and delivery only; branch-neutral product keys support future GATE paper codes.
 - Question Bank: original content and review/release manifests.

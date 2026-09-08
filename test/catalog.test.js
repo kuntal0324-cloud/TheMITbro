@@ -1,6 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { ACTIVE_PROGRAM, PRODUCTS, getProduct, isPurchasable, publicCatalog } from "../api/_lib/catalog.js";
+
+const upstreamCheckpoint = JSON.parse(readFileSync(
+  new URL("../private/production_state/GATE_2027_EE_UPSTREAM_CHECKPOINT.json", import.meta.url),
+  "utf8",
+));
 
 test("GATE 2027 EE is the only active 50-set program", () => {
   assert.equal(ACTIVE_PROGRAM.paperCode, "EE");
@@ -32,4 +38,17 @@ test("release predicate requires every commercial gate", () => {
     privateFile: "GATE_2027_EE_SET_01.pdf",
     priceRupees: 500,
   }), true);
+});
+
+test("catalog remains blocked at the current upstream production checkpoint", () => {
+  assert.equal(upstreamCheckpoint.release_authorized, false);
+  assert.equal(upstreamCheckpoint.program_totals.unique_candidates, 40);
+  assert.equal(upstreamCheckpoint.program_totals.formatter_passed, 40);
+  assert.equal(upstreamCheckpoint.program_totals.paper_eligible, 20);
+  assert.equal(upstreamCheckpoint.program_totals.complete_65_question_sets, 0);
+  assert.equal(upstreamCheckpoint.program_totals.released_sets, 0);
+  assert.ok(Object.values(PRODUCTS).every(product => (
+    product.status === upstreamCheckpoint.catalog_required_status &&
+    !isPurchasable(product)
+  )));
 });
