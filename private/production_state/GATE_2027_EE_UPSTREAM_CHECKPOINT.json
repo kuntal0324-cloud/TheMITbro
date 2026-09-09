@@ -12,7 +12,9 @@
     },
     "batch_002": {
       "domain": "Electric Circuits",
-      "source_sha256": "23b749225f9128864b1e1545c865ba1d08b8ee706b3faf69e6202099b913db36",
+      "source_sha256": "2a2344b2ed353d0fb309ea98dada882b7371aaa7016e95ff6547d0dba6fb96e5",
+      "source_revision": 2,
+      "math_render_contract": "XELATEX_LATIN_MODERN_MATH",
       "questions": 20,
       "formatter_passed": 20,
       "independent_ai_recomputed": 20,
@@ -30,5 +32,5 @@
   },
   "release_authorized": false,
   "catalog_required_status": "under_review",
-  "blocker": "No complete 65-question, 100-mark, manifest-backed paper has passed named human technical and visual QA."
+  "blocker": "Batch 002 revision 2 is ready for fresh named human QA; no complete 65-question, 100-mark, manifest-backed paper has passed named human technical and visual QA."
 }

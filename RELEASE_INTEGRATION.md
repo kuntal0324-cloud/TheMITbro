@@ -8,7 +8,7 @@ For a catalog product to become `released`, all of these must identify the same 
 2. Question Bank release manifest with every question marked `PAPER_ELIGIBLE`.
 3. Formatter qualification report with no `FAIL` or unresolved `REVIEW` item.
 4. Duplicate/family/originality checks.
-5. Learner-facing render check with no exposed source math markup.
+5. Canonical LaTeX source and a learner-facing XeLaTeX render with standard mathematical notation, embedded math fonts and no exposed source markup.
 6. Named human technical and visual signoff.
 7. PDF checksum recorded in the release manifest.
 
@@ -23,6 +23,6 @@ The same contract applies to future branches. Use a distinct paper code, syllabu
 
 ## Current upstream checkpoint — 2026-09-08
 
-The Question Bank currently contains 40 unique candidates across Batches 001 and 002. All 40 pass Formatter; 20 Batch 001 records are human-certified, paper-eligible and admitted, while all 20 Batch 002 records remain blocked pending named human final QA. No 65-question paper is complete, so all 50 catalog products correctly remain `under_review` and non-purchasable.
+The Question Bank currently contains 40 unique candidates across Batches 001 and 002. All 40 pass Formatter; 20 Batch 001 records are human-certified, paper-eligible and admitted. Batch 002 was reissued as revision 2 with canonical LaTeX and XeLaTeX review rendering; its 20 records remain blocked pending a fresh named human final QA. No 65-question paper is complete, so all 50 catalog products correctly remain `under_review` and non-purchasable.
 
 The machine-checked snapshot is `private/production_state/GATE_2027_EE_UPSTREAM_CHECKPOINT.json`. It is a deployment guard, not release authorization; every future checkpoint change must arrive with its matching immutable Question Bank and Formatter evidence.
