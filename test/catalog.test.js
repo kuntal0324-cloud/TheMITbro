@@ -47,6 +47,8 @@ test("catalog remains blocked at the current upstream production checkpoint", ()
   assert.equal(upstreamCheckpoint.program_totals.paper_eligible, 20);
   assert.equal(upstreamCheckpoint.program_totals.complete_65_question_sets, 0);
   assert.equal(upstreamCheckpoint.program_totals.released_sets, 0);
+  assert.equal(upstreamCheckpoint.question_bank.batch_002.source_revision, 2);
+  assert.equal(upstreamCheckpoint.question_bank.batch_002.math_render_contract, "XELATEX_LATIN_MODERN_MATH");
   assert.ok(Object.values(PRODUCTS).every(product => (
     product.status === upstreamCheckpoint.catalog_required_status &&
     !isPurchasable(product)
