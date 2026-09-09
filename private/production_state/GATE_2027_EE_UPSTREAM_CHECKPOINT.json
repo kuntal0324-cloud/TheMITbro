@@ -1,12 +1,20 @@
 {
   "checkpoint_contract": "GATE_2027_EE_UPSTREAM_CHECKPOINT_V1",
-  "as_of": "2026-09-08",
+  "as_of": "2026-09-09",
+  "upstream_provenance": {
+    "question_bank_repository": "kuntal0324-cloud/TheMITbro_Question_Bank",
+    "question_bank_main_merge_commit_short": "4609bee",
+    "question_bank_merge_pr": 7,
+    "eight_day_progress_sha256": "fc35e474728dd31427e594553a39940f3a56182ccf00a997075c318d1a7af91b",
+    "family_registry_sha256": "9c6c727a0ac771323170f2db29e92496f0a54ad6268a56a1d20f2584ac06552a"
+  },
   "question_bank": {
     "batch_001": {
       "domain": "Engineering Mathematics",
       "source_sha256": "cf815b061af0d357df02796f34021b69c3e2465835a1ab1caab7d1ae16d61256",
       "questions": 20,
       "formatter_passed": 20,
+      "human_final_qa": "PASSED",
       "paper_eligible": 20,
       "corpus_admitted": 20
     },
@@ -17,20 +25,31 @@
       "math_render_contract": "XELATEX_LATIN_MODERN_MATH",
       "questions": 20,
       "formatter_passed": 20,
+      "formatter_evidence_sha256": "223878974b5e5999113b8a9a0a87a28d77306cdc2cc1f880108b9cbbfddd4883",
       "independent_ai_recomputed": 20,
-      "human_final_qa": "PENDING",
-      "paper_eligible": 0,
-      "corpus_admitted": 0
+      "independent_ai_qa_sha256": "5df1cddd1653fb2bcfc764a89293fe2991fa116ab03138e3a5ae5bcbc515c8ed",
+      "human_final_qa": "PASSED",
+      "human_final_qa_passed": 20,
+      "human_final_qa_revise": 0,
+      "human_final_qa_reject": 0,
+      "human_signoff_sha256": "7f164c34f909b899a834509de61f1807860c1da0ed4fd12534bed383a8a1f2f2",
+      "completed_review_pdf_sha256": "5f46e0900e719bc7726722f7775ade11bac0044005a5716a6aeaabea5ea6cc9e",
+      "paper_eligibility_certificate_sha256": "44dd7bb850e05596d75512909dbafafc226b79cbf7a6ef231a1e5dca376b5900",
+      "corpus_admission_manifest_sha256": "02ca9783aaaf8e1c8a250c255b103c4d042b4d749661658e905c3ce302624aa9",
+      "paper_eligible": 20,
+      "corpus_admitted": 20
     }
   },
   "program_totals": {
     "unique_candidates": 40,
     "formatter_passed": 40,
-    "paper_eligible": 20,
+    "human_final_qa_passed": 40,
+    "paper_eligible": 40,
+    "corpus_admitted": 40,
     "complete_65_question_sets": 0,
     "released_sets": 0
   },
   "release_authorized": false,
   "catalog_required_status": "under_review",
-  "blocker": "Batch 002 revision 2 is ready for fresh named human QA; no complete 65-question, 100-mark, manifest-backed paper has passed named human technical and visual QA."
+  "blocker": "Only 40 paper-eligible questions are admitted. No complete 65-question, 100-mark, manifest-backed paper has passed named human technical and visual QA."
 }
