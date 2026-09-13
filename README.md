@@ -6,7 +6,7 @@ A paper may enter `private/releases` only after a matching immutable release man
 
 See `SECURITY_AND_LAUNCH.md` before public launch.
 
-Current upstream position (2026-09-09): 40 unique candidates are in the production program, and all 40 are human-certified, paper-eligible and admitted to Corpus V1. This is still insufficient for one complete 65-question paper, so zero complete sets exist and the catalog remains fully blocked. See `private/production_state/GATE_2027_EE_UPSTREAM_CHECKPOINT.json`.
+Current merged upstream position (2026-09-12): 60 unique candidates are in the production program, and all 60 are human-certified, paper-eligible and admitted to Corpus V1. This is still insufficient for one complete 65-question paper, so zero complete sets exist and the catalog remains fully blocked. See `private/production_state/GATE_2027_EE_UPSTREAM_CHECKPOINT.json`.
 
 ## Repository boundaries
 - Website: commerce and delivery only; branch-neutral product keys support future GATE paper codes.

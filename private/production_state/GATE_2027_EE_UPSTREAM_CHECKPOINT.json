@@ -1,12 +1,15 @@
 {
   "checkpoint_contract": "GATE_2027_EE_UPSTREAM_CHECKPOINT_V1",
-  "as_of": "2026-09-09",
+  "as_of": "2026-09-12",
   "upstream_provenance": {
     "question_bank_repository": "kuntal0324-cloud/TheMITbro_Question_Bank",
-    "question_bank_main_merge_commit_short": "4609bee",
-    "question_bank_merge_pr": 7,
-    "eight_day_progress_sha256": "fc35e474728dd31427e594553a39940f3a56182ccf00a997075c318d1a7af91b",
-    "family_registry_sha256": "9c6c727a0ac771323170f2db29e92496f0a54ad6268a56a1d20f2584ac06552a"
+    "question_bank_main_merge_commit_short": "0a51ad6",
+    "question_bank_merge_pr": 9,
+    "formatter_repository": "kuntal0324-cloud/TheMITBro_Formatter",
+    "formatter_main_merge_commit_short": "b695709",
+    "formatter_merge_pr": 5,
+    "eight_day_progress_sha256": "43ae2ea39886eeaa1281e1f162df6aeaa9c598e301b73f954487a1b61343c6b1",
+    "family_registry_sha256": "dd1d42ea8e5a885dc5252b90adb1d6c1c57e7a821d16c680b3c74bc2369192bc"
   },
   "question_bank": {
     "batch_001": {
@@ -38,18 +41,37 @@
       "corpus_admission_manifest_sha256": "02ca9783aaaf8e1c8a250c255b103c4d042b4d749661658e905c3ce302624aa9",
       "paper_eligible": 20,
       "corpus_admitted": 20
+    },
+    "batch_003": {
+      "domain": "General Aptitude",
+      "source_sha256": "b00075f2ae17951baccc382ea59d149e8d0df73a21fd6398bc8e2af9038c902b",
+      "questions": 20,
+      "formatter_passed": 20,
+      "formatter_evidence_sha256": "e517ed2606ede6dd5f81465dc50fe1b95cbd66d9699a779c45630a2dfd10d300",
+      "independent_ai_recomputed": 20,
+      "independent_ai_qa_sha256": "0ac9d37a86fddc05f42f8c9960cf859a386f0adce525ea3d35fc303b338bd347",
+      "human_final_qa": "PASSED",
+      "human_final_qa_passed": 20,
+      "human_final_qa_revise": 0,
+      "human_final_qa_reject": 0,
+      "human_signoff_sha256": "b78e2d796dff4e8e2accd7d1e3fbd0f501e6724594cabc06a3393f9b2116d93c",
+      "completed_review_pdf_sha256": "b18ec0bd1eb62f2c9151a8ba726857cb227cda1544660d5008ba82275a0de9e8",
+      "paper_eligibility_certificate_sha256": "165703c478238a092c13e012c240a1bb92ca7c2cfea2c7bd5c2ff44eab1c0e45",
+      "corpus_admission_manifest_sha256": "c1c8be68704f6401ded6bff0f94b9ceb27624c207688b9f7dc24a7c16e9c9221",
+      "paper_eligible": 20,
+      "corpus_admitted": 20
     }
   },
   "program_totals": {
-    "unique_candidates": 40,
-    "formatter_passed": 40,
-    "human_final_qa_passed": 40,
-    "paper_eligible": 40,
-    "corpus_admitted": 40,
+    "unique_candidates": 60,
+    "formatter_passed": 60,
+    "human_final_qa_passed": 60,
+    "paper_eligible": 60,
+    "corpus_admitted": 60,
     "complete_65_question_sets": 0,
     "released_sets": 0
   },
   "release_authorized": false,
   "catalog_required_status": "under_review",
-  "blocker": "Only 40 paper-eligible questions are admitted. No complete 65-question, 100-mark, manifest-backed paper has passed named human technical and visual QA."
+  "blocker": "Only 60 paper-eligible questions are admitted. No complete 65-question, 100-mark, manifest-backed paper has passed named human technical and visual QA."
 }
