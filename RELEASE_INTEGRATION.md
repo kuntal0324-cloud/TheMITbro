@@ -21,8 +21,8 @@ Only then:
 
 The same contract applies to future branches. Use a distinct paper code, syllabus map, blueprint, corpus and product IDs; never pool questions across branches by keyword alone.
 
-## Current upstream checkpoint — 2026-09-09
+## Current upstream checkpoint — 2026-09-12
 
-The Question Bank currently contains 40 unique candidates across Batches 001 and 002. All 40 pass Formatter, named human final QA, paper-eligibility certification and Corpus V1 admission. Batch 002 remains revision 2 with canonical LaTeX and XeLaTeX review rendering. No 65-question paper is complete, so all 50 catalog products correctly remain `under_review` and non-purchasable.
+The merged Question Bank currently contains 60 unique candidates across Batches 001, 002 and 003. All 60 pass Formatter, named human final QA, paper-eligibility certification and Corpus V1 admission. Batch 002 remains revision 2 with canonical LaTeX and XeLaTeX review rendering, and Batch 003 contributes the certified General Aptitude inventory. No 65-question paper is complete, so all 50 catalog products correctly remain `under_review` and non-purchasable.
 
-The machine-checked snapshot is `private/production_state/GATE_2027_EE_UPSTREAM_CHECKPOINT.json`. It is bound to Question Bank merge PR #7 (`4609bee`) and the Batch 002 source, Formatter, independent-QA, human-signoff, completed-review-PDF, paper-eligibility-certificate and corpus-admission hashes. It is a deployment guard, not release authorization; every future checkpoint change must arrive with its matching immutable Question Bank and Formatter evidence.
+The machine-checked snapshot is `private/production_state/GATE_2027_EE_UPSTREAM_CHECKPOINT.json`. It is bound to Question Bank merge PR #9 (`0a51ad6`), Formatter merge PR #5 (`b695709`) and the immutable Batch 002/003 evidence chains. It is a deployment guard, not release authorization; every future checkpoint change must arrive with its matching immutable Question Bank and Formatter evidence.
