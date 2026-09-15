@@ -21,8 +21,8 @@ Only then:
 
 The same contract applies to future branches. Use a distinct paper code, syllabus map, blueprint, corpus and product IDs; never pool questions across branches by keyword alone.
 
-## Current upstream checkpoint — 2026-09-12
+## Current upstream checkpoint — 2026-09-14
 
-The merged Question Bank currently contains 60 unique candidates across Batches 001, 002 and 003. All 60 pass Formatter, named human final QA, paper-eligibility certification and Corpus V1 admission. Batch 002 remains revision 2 with canonical LaTeX and XeLaTeX review rendering, and Batch 003 contributes the certified General Aptitude inventory. No 65-question paper is complete, so all 50 catalog products correctly remain `under_review` and non-purchasable.
+The Question Bank contains 87 unique candidates across Batches 001–005. All 87 pass Formatter, named-human batch QA, paper-eligibility certification and Corpus V1 admission. The Set 01 review checkpoint freezes 65 exact revisions and binds deterministic question, solution and fillable QA PDFs, but those complete-paper artifacts still await named-human technical and visual QA, reviewer-metadata reconfirmation and a separate release certificate. All 50 catalog products therefore remain `under_review` and non-purchasable.
 
-The machine-checked snapshot is `private/production_state/GATE_2027_EE_UPSTREAM_CHECKPOINT.json`. It is bound to Question Bank merge PR #9 (`0a51ad6`), Formatter merge PR #5 (`b695709`) and the immutable Batch 002/003 evidence chains. It is a deployment guard, not release authorization; every future checkpoint change must arrive with its matching immutable Question Bank and Formatter evidence.
+The machine-checked snapshot is `private/production_state/GATE_2027_EE_UPSTREAM_CHECKPOINT.json`. It is bound to Question Bank PRs #10/#11, Formatter PR #6, all five immutable batch evidence chains and the exact Set 01 review-package/artifact hashes. The supplied files do not expose the Question Bank PR #11 merge-commit identifier, so the checkpoint records the verified source-head and package/evidence hashes rather than inventing a commit. It is a deployment guard, not release authorization.
