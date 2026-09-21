@@ -5,6 +5,8 @@ const publishedCount = document.getElementById("published-count");
 const commerceStatus = document.getElementById("commerce-status");
 const commerceReason = document.getElementById("commerce-reason");
 const paymentStatus = document.getElementById("payment-status");
+const offersRoot = document.getElementById("offers");
+let razorpayLoader = null;
 
 function setPaymentStatus(message = "", type = "") {
   paymentStatus.textContent = message;
@@ -25,15 +27,35 @@ async function jsonRequest(url, options = {}) {
   return data;
 }
 
+function loadRazorpayCheckout() {
+  if (typeof window.Razorpay === "function") return Promise.resolve();
+  if (razorpayLoader) return razorpayLoader;
+
+  razorpayLoader = new Promise((resolve, reject) => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    script.onload = () => {
+      if (typeof window.Razorpay === "function") resolve();
+      else reject(new Error("Secure checkout did not initialize. Please try again."));
+    };
+    script.onerror = () => reject(new Error("Secure checkout is temporarily unavailable. Please try again."));
+    document.head.append(script);
+  }).catch(error => {
+    razorpayLoader = null;
+    throw error;
+  });
+
+  return razorpayLoader;
+}
+
 async function beginPurchase(product, button) {
   if (!product.purchasable || button.disabled) return;
   button.disabled = true;
   setPaymentStatus(`Preparing secure checkout for ${product.title}…`);
 
   try {
-    if (typeof window.Razorpay !== "function") {
-      throw new Error("Secure checkout is temporarily unavailable. Please try again.");
-    }
+    await loadRazorpayCheckout();
     const order = await jsonRequest("/api/create-order", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -95,18 +117,62 @@ function productCard(product) {
   const details = document.createElement("p");
   details.textContent = "65 questions · 100 marks · 180 minutes";
 
+  const price = document.createElement("p");
+  price.className = "planned-price";
+  price.textContent = product.purchasable
+    ? `Released price · ₹${product.priceRupees.toLocaleString("en-IN")}`
+    : `Planned individual price · ₹${product.plannedPriceRupees.toLocaleString("en-IN")}`;
+
   const button = document.createElement("button");
   button.className = "btn";
   button.type = "button";
   button.disabled = !product.purchasable;
   button.textContent = product.purchasable
     ? `Purchase · ₹${product.priceRupees.toLocaleString("en-IN")}`
-    : "Under review";
+    : "Not on sale";
   if (product.purchasable) {
     button.addEventListener("click", () => beginPurchase(product, button));
   }
 
-  article.append(tag, heading, details, button);
+  article.append(tag, heading, details, price, button);
+  return article;
+}
+
+function offerCard(offer) {
+  const article = document.createElement("article");
+  article.className = "card offer-card";
+
+  const tag = document.createElement("span");
+  tag.className = "tag";
+  tag.textContent = offer.paperCount === 1 ? "PLANNED · SINGLE PAPER" : `PLANNED · ${offer.paperCount} PAPERS`;
+
+  const heading = document.createElement("h3");
+  heading.textContent = offer.title;
+
+  const price = document.createElement("p");
+  price.className = "offer-price";
+  price.textContent = `₹${offer.plannedPriceRupees.toLocaleString("en-IN")}`;
+
+  const unit = document.createElement("p");
+  unit.textContent = `₹${offer.effectivePriceRupees.toFixed(2)} per paper`;
+
+  const saving = document.createElement("p");
+  saving.className = "saving";
+  saving.textContent = offer.savingsRupees > 0
+    ? `Save ₹${offer.savingsRupees.toLocaleString("en-IN")} (${offer.savingsPercent.toFixed(2)}%) compared with ${offer.paperCount} individual papers.`
+    : "Each paper is purchased only after its exact release is approved.";
+
+  const progress = document.createElement("p");
+  progress.className = "inventory-progress";
+  progress.textContent = `${offer.contentReadySets}/${offer.paperCount} complete papers ready · ${offer.commerciallyReleasedSets}/${offer.paperCount} commercially released`;
+
+  const button = document.createElement("button");
+  button.className = "btn";
+  button.type = "button";
+  button.disabled = true;
+  button.textContent = offer.status === "inventory_locked" ? "Inventory locked" : "Commercial launch pending";
+
+  article.append(tag, heading, price, unit, saving, progress, button);
   return article;
 }
 
@@ -114,12 +180,14 @@ async function loadCatalog() {
   try {
     const data = await jsonRequest("/api/catalog");
     const products = data.products;
+    const offers = data.offers;
     const released = products.filter(product => product.purchasable).length;
     summary.textContent = `${products.length} planned · ${released} released · ${products.length - released} under review`;
     publishedCount.textContent = String(released);
     commerceStatus.textContent = released ? "Available" : "Blocked";
     commerceStatus.className = released ? "available" : "blocked";
     commerceReason.textContent = released ? "Integrity-verified listings only" : "Commercial approval pending";
+    offersRoot.replaceChildren(...offers.map(offerCard));
     root.replaceChildren(...products.slice(0, 6).map(productCard));
     more.textContent = products.length > 6
       ? `Plus ${products.length - 6} additional planned sets. Unreleased listings remain locked.`
@@ -128,6 +196,7 @@ async function loadCatalog() {
     summary.textContent = "Catalog temporarily unavailable.";
     root.textContent = "Please try again later.";
     commerceReason.textContent = "Catalog unavailable";
+    offersRoot.textContent = "Planned pricing is temporarily unavailable.";
   }
 }
 

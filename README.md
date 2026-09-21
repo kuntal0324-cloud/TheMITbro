@@ -1,12 +1,12 @@
 # TheMITbro Website — GATE 2027 EE recovery build
 
-Static storefront + Vercel serverless API + Razorpay checkout. The only active content scope is GATE 2027 Electrical Engineering. All 50 planned sets are `under_review`; payment and download are deliberately blocked.
+Static storefront + Vercel serverless API + Razorpay checkout. The only active content scope is GATE 2027 Electrical Engineering. All 50 planned sets are `under_review`; payment and download are deliberately blocked. The public catalog now displays a non-purchasable plan of ₹29 per individual paper, ₹487 for a future 20-paper pack and ₹937 for a future 50-paper pack.
 
 A paper may enter `private/releases` only after a matching immutable release manifest and named human signoff exist. Quarantined legacy files are not reachable from the catalog or API.
 
 See `SECURITY_AND_LAUNCH.md` before public launch.
 
-Current upstream position (2026-09-21): 87 unique candidates are individually human-certified, paper-eligible and admitted to Corpus V1. Set 01 has passed whole-paper QA at 65/65, and its exact RC1 question, solution and combined learner-pack checksums have received named-human release authorization. The immutable candidate and latest supplied authorization record are staged under `private/release_candidates/`. They are deliberately not under `private/releases/`: no price, sale authorization or storefront activation has been approved. One complete release-authorized set and zero commercially released sets exist; all 50 catalog products remain blocked. See `private/production_state/GATE_2027_EE_UPSTREAM_CHECKPOINT.json` and `private/production_state/GATE_2027_EE_SET_01_COMMERCIAL_PREFLIGHT.json`.
+Current upstream position (2026-09-21): 87 unique candidates are individually human-certified, paper-eligible and admitted to Corpus V1. Set 01 has passed whole-paper QA at 65/65, and its exact RC1 question, solution and combined learner-pack checksums have received named-human release authorization. The immutable candidate and latest supplied authorization record are staged under `private/release_candidates/`. They are deliberately not under `private/releases/`: the planned ₹29 price is recorded, but payment mode, sale authorization, legal review and storefront activation remain incomplete. One complete release-authorized set and zero commercially released sets exist; all 50 catalog products and both packs remain blocked. See `private/production_state/GATE_2027_EE_UPSTREAM_CHECKPOINT.json`, `private/production_state/GATE_2027_EE_SET_01_COMMERCIAL_PREFLIGHT.json` and `COMMERCIAL_CATALOG_PLAN.md`.
 
 Runtime purchase eligibility is fail-closed. A positive catalog status is insufficient: the server revalidates the commercial manifest, signed commercial-preflight state and learner-pack SHA-256 before creating an order or serving a download.
 

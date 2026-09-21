@@ -1,0 +1,42 @@
+{
+  "catalog_plan_contract": "THEMITBRO_COMMERCIAL_CATALOG_PLAN_V1",
+  "as_of": "2026-09-21",
+  "program_id": "GATE_2027_EE",
+  "currency": "INR",
+  "offers": [
+    {
+      "id": "GATE_2027_EE_SINGLE_PAPER",
+      "kind": "individual",
+      "title": "Individual mock paper",
+      "paper_count": 1,
+      "price_rupees": 29,
+      "availability_rule": "EACH_INCLUDED_PAPER_MUST_PASS_COMMERCIAL_RELEASE_INTEGRITY"
+    },
+    {
+      "id": "GATE_2027_EE_PACK_20",
+      "kind": "bundle",
+      "title": "20-paper pack",
+      "paper_count": 20,
+      "price_rupees": 487,
+      "availability_rule": "EXACTLY_20_INCLUDED_PAPERS_MUST_PASS_COMMERCIAL_RELEASE_INTEGRITY"
+    },
+    {
+      "id": "GATE_2027_EE_PACK_50",
+      "kind": "bundle",
+      "title": "50-paper pack",
+      "paper_count": 50,
+      "price_rupees": 937,
+      "availability_rule": "EXACTLY_50_INCLUDED_PAPERS_MUST_PASS_COMMERCIAL_RELEASE_INTEGRITY"
+    }
+  ],
+  "controls": {
+    "preorders_allowed": false,
+    "future_content_payments_allowed": false,
+    "bundle_checkout_implemented": false,
+    "display_unproven_prior_prices": false,
+    "sale_authorized": false,
+    "storefront_activated": false,
+    "payment_mode": null
+  },
+  "catalog_plan_content_sha256": "fe58f1d9024915225b081dae2fb3c683cd48b1cbaa08089777fb4f337f1db90d"
+}

@@ -13,6 +13,11 @@
 - Product price/availability has one server-side catalog.
 - Every current product is `under_review` and cannot be purchased.
 - Added checkout UI that remains disabled unless the server marks a product integrity-verified and purchasable.
+- Added a self-hashed 1/20/50-paper pricing plan whose controls explicitly forbid preorders, future-content payments, sale and storefront activation.
+- Added server-derived offer readiness: the 20- and 50-paper packs remain inventory-locked until the required number of exact papers exists.
+- Replaced minimal policy pages with responsive, dated disclosures that distinguish current operation from future checkout behavior.
+- Marked missing legal seller, address, telephone and grievance details as launch blockers instead of inventing them.
+- Deferred the Razorpay checkout script until a user selects an integrity-verified purchasable listing; the current locked catalog does not contact the checkout script.
 - Added pull-request CI for syntax, tests and dependency audit.
 - Added no-sniff, anti-framing, referrer and browser-permission response headers.
 - `node_modules/` is removed from source control.
@@ -25,9 +30,12 @@
 Enable automatic payment capture in the Razorpay account if you want immediate digital delivery; this build intentionally does not deliver a paid PDF until Razorpay reports the payment as captured.
 
 ## Before public domain launch
-1. Run a real low-value controlled purchase after deploying.
-2. Confirm a direct `/paper/GATE_EE_SET_B.pdf` request returns 404.
-3. Confirm an expired/tampered `/api/download` token returns 403.
-4. Confirm payment amount shown by Razorpay matches the catalog.
-5. Add only Formatter-generated, manifest-backed, human-reviewed production releases.
-6. Review legal/tax/refund requirements applicable to your business before accepting public sales.
+1. Publish and verify the legal seller name, principal geographic address, customer-care phone, grievance contact and applicable business/tax identifiers.
+2. Have the owner or qualified adviser review the terms, privacy, refund and contact pages for the actual business and jurisdiction.
+3. Record the payment mode and named sale/storefront authorizations for the exact product; do not treat the catalog plan as authorization.
+4. Run a controlled ₹29 Razorpay test-mode purchase after deploying.
+5. Confirm a direct `/paper/GATE_EE_SET_B.pdf` request returns 404.
+6. Confirm an expired/tampered `/api/download` token returns 403.
+7. Confirm the amount shown by Razorpay matches the server catalog and that only the purchased 39-page learner pack is delivered.
+8. Add only Formatter-generated, manifest-backed, human-reviewed production releases.
+9. Keep both bundles disabled until their full inventory and entitlement/delivery implementation pass automated and end-to-end tests.

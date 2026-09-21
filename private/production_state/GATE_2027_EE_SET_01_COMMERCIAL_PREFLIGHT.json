@@ -22,7 +22,7 @@
   },
   "commercial_decision": {
     "currency": "INR",
-    "price_rupees": null,
+    "price_rupees": 29,
     "sale_authorized": false,
     "storefront_activated": false,
     "payment_mode": null,
@@ -32,11 +32,10 @@
   },
   "status": "READY_AWAITING_EXPLICIT_COMMERCIAL_DECISION",
   "blockers": [
-    "Price has not been selected.",
     "Sale has not been explicitly authorized.",
     "Storefront activation has not been explicitly authorized.",
     "Payment mode has not been selected.",
     "Legal and refund details have not been confirmed for launch."
   ],
-  "preflight_content_sha256": "ce2b3be9285ddeb44c8044777cb648e7c940399359ffbb3ccaa1c40a47dabc21"
+  "preflight_content_sha256": "3e7c766eb5d311b5ac48b8bb026826c0a58d209da3544a64350356ece9c1e38f"
 }

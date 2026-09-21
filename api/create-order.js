@@ -1,4 +1,3 @@
-import Razorpay from "razorpay";
 import { randomBytes } from "node:crypto";
 import { getProduct, isPurchasable } from "./_lib/catalog.js";
 
@@ -12,6 +11,16 @@ export default async function handler(req, res) {
   }
 
   try {
+    const { paperId } = req.body || {};
+    const product = getProduct(paperId);
+
+    if (!isPurchasable(product)) {
+      return res.status(400).json({
+        success: false,
+        message: "Paper is not available for purchase."
+      });
+    }
+
     const keyId = process.env.RAZORPAY_KEY_ID;
     const keySecret = process.env.RAZORPAY_KEY_SECRET;
 
@@ -23,22 +32,11 @@ export default async function handler(req, res) {
       });
     }
 
+    const { default: Razorpay } = await import("razorpay");
     const razorpay = new Razorpay({
       key_id: keyId,
       key_secret: keySecret
     });
-
-    const { paperId } = req.body || {};
-    const product = getProduct(paperId);
-
-    if (
-      !isPurchasable(product)
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: "Paper is not available for purchase."
-      });
-    }
 
     const order = await razorpay.orders.create({
       amount: product.priceRupees * 100,

@@ -1,5 +1,9 @@
 import { readFileSync } from "node:fs";
 import { hasCommercialReleaseFields, validateReleaseIntegrity } from "./release-integrity.js";
+import {
+  PLANNED_INDIVIDUAL_PRICE_RUPEES,
+  publicOfferPlans,
+} from "./commercial-plan.js";
 
 const PROGRAMS = Object.freeze([
   Object.freeze({
@@ -19,6 +23,13 @@ if (registry.registry_contract !== "THEMITBRO_RELEASE_REGISTRY_V1") {
   throw new Error("Release registry contract mismatch");
 }
 const RELEASES = Object.freeze(registry.products || {});
+const upstreamCheckpoint = JSON.parse(readFileSync(
+  new URL("../../private/production_state/GATE_2027_EE_UPSTREAM_CHECKPOINT.json", import.meta.url),
+  "utf8",
+));
+if (upstreamCheckpoint.checkpoint_contract !== "GATE_2027_EE_UPSTREAM_CHECKPOINT_V4") {
+  throw new Error("Upstream checkpoint contract mismatch");
+}
 const plannedIds = new Set(PROGRAMS.flatMap(program => (
   Array.from({ length: program.setCount }, (_, index) => (
     `${program.examFamily}_${program.examYear}_${program.paperCode}_SET_${String(index + 1).padStart(2, "0")}`
@@ -39,6 +50,7 @@ function plannedProduct(program, setNumber) {
     title: `${program.examFamily} ${program.examYear} ${program.paperCode} — Mock Set ${number}`,
     ...program,
     setNumber,
+    plannedPriceRupees: PLANNED_INDIVIDUAL_PRICE_RUPEES,
     priceRupees: release.priceRupees ?? null,
     status: release.status ?? "under_review",
     releaseManifest: release.releaseManifest ?? null,
@@ -67,6 +79,14 @@ export function publicCatalog() {
     ...product,
     purchasable: isPurchasable({ ...product, privateFile, releaseManifest }),
   }));
+}
+
+export function publicCommercialOffers() {
+  const commerciallyReleasedSets = Object.values(PRODUCTS).filter(isPurchasable).length;
+  return publicOfferPlans({
+    contentReadySets: upstreamCheckpoint.program_totals.complete_65_question_sets,
+    commerciallyReleasedSets,
+  });
 }
 
 export const ACTIVE_PROGRAM = PROGRAMS[0];
