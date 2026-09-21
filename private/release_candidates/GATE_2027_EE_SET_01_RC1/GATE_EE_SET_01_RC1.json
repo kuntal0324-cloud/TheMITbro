@@ -1,0 +1,81 @@
+{
+  "candidate_contract": "GATE_EE_SET01_LEARNER_RELEASE_CANDIDATE_V1",
+  "candidate_id": "GATE_2027_EE_SET_01_RC1",
+  "paper_id": "GATE_2027_EE_SET_01",
+  "generated_on": "2026-09-19",
+  "status": "RELEASE_CANDIDATE_AWAITING_EXACT_ARTIFACT_AUTHORIZATION",
+  "source_review_manifest": {
+    "path": "GATE_EE/corpus_v1/paper_manifests/GATE_EE_SET_01_V1.json",
+    "file_sha256": "66c07b363788e76872a62642585946639a96c9f75f4cae242513e2b315c19924",
+    "content_sha256": "0a5a9c14cdca6c92db41317239a36afe73da6efda2b5ae642625649a94b03cc8"
+  },
+  "source_formatter_handoff": {
+    "path": "GATE_EE/corpus_v1/formatter_handoff/GATE_EE_SET_01_V1_FORMATTER_HANDOFF.json",
+    "file_sha256": "76aa106f6489a6de09d5cea87c65253ef5000b702e5c025b712b5c31da9c49ea",
+    "content_sha256": "429a79bfc3d7f215fe838a5da79f14df8b143863dc98258d1540f2422da8ed4e"
+  },
+  "complete_paper_human_qa": {
+    "path": "GATE_EE/corpus_v1/review_manifests/GATE_EE_SET_01_HUMAN_FINAL_QA_COMPLETED.json",
+    "file_sha256": "af03bfc1b366f794597e4dc6211306d169273d09b11eef88f17640400081380f",
+    "content_sha256": "9c2a1213a5433b87e04548725bdf10f1e892d6d257c6bb227710ad278751dff4",
+    "completed_pdf_sha256": "7526e6aed23355a75f9d9a331fd190ddd552d9e05af0c8f096f89c54b669cfd3",
+    "status": "COMPLETE_PAPER_QA_APPROVED",
+    "pass_count": 65
+  },
+  "formatter_release_evidence": {
+    "path": "GATE_EE/corpus_v1/formatter_handoff/GATE_EE_SET_01_FORMATTER_RELEASE_EVIDENCE.json",
+    "file_sha256": "9817751dbcd5cc4c761ec7595b4062d9e5137732dce4d9a30a1e1986cff85c81",
+    "content_sha256": "abd01b08ca49ff7683933c32d079d43b9a9ef59397b33766df92ea5de421a51a",
+    "status": "PASS",
+    "pass_count": 65
+  },
+  "artifacts": {
+    "question_pdf": {
+      "path": "output/pdf/GATE_EE_SET_01_QUESTION_PAPER_RC1.pdf",
+      "sha256": "5479e90058e363f3c67494753c3c860540177ef2e84713eb9bec13595c2f9491",
+      "bytes": 295532,
+      "pages": 16,
+      "producer": "xdvipdfmx (20220710)"
+    },
+    "solution_pdf": {
+      "path": "output/pdf/GATE_EE_SET_01_SOLUTIONS_RC1.pdf",
+      "sha256": "8ba106686bbb7b405de96dfb9ab6308bdf4e93b958882cafb67360a7fb4e1f19",
+      "bytes": 329804,
+      "pages": 23,
+      "producer": "xdvipdfmx (20220710)"
+    },
+    "learner_pack_pdf": {
+      "path": "output/pdf/GATE_EE_SET_01_LEARNER_PACK_RC1.pdf",
+      "sha256": "f6526a7ed7a16e12339f12206a8ca4ec88c5177f159f9a276ef3f2ef4298be58",
+      "bytes": 630142,
+      "pages": 39,
+      "producer": "pypdf"
+    },
+    "release_authorization_pdf": {
+      "path": "output/pdf/GATE_EE_SET_01_RELEASE_AUTHORIZATION_MOBILE_FILLABLE.pdf",
+      "sha256": "a907ead03a603a358bfd62ee1bc4620d2a6ad887ab0c47e8f936e18b480b53f3",
+      "bytes": 60633,
+      "pages": 1,
+      "producer": "ReportLab PDF Library - (opensource)"
+    }
+  },
+  "learner_copy_contract": {
+    "independent_practice_disclaimer": true,
+    "internal_audit_ids_removed": true,
+    "review_only_markings_removed": true,
+    "question_count": 65,
+    "marks": 100,
+    "duration_minutes": 180
+  },
+  "gate_state": {
+    "complete_paper_human_qa": "PASS_65_OF_65",
+    "formatter_release_qualification": "PASS_65_OF_65",
+    "learner_artifact_validation": "PENDING_INDEPENDENT_VALIDATOR",
+    "exact_artifact_release_authorization": "PENDING",
+    "release_authorized": false,
+    "price_set": false,
+    "storefront_activated": false,
+    "sale_authorized": false
+  },
+  "candidate_content_sha256": "3c719fe424b564ca4843b334588046be3e3ba428ce62cf58b5c615dddad2346e"
+}
