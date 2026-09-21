@@ -1,4 +1,5 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "headers": [
     {
       "source": "/(.*)",
@@ -24,28 +25,16 @@
   ],
   "functions": {
     "api/catalog.js": {
-      "includeFiles": [
-        "private/releases/**",
-        "private/production_state/**"
-      ]
+      "includeFiles": "private/{releases,production_state}/**"
     },
     "api/create-order.js": {
-      "includeFiles": [
-        "private/releases/**",
-        "private/production_state/**"
-      ]
+      "includeFiles": "private/{releases,production_state}/**"
     },
     "api/verify-payment.js": {
-      "includeFiles": [
-        "private/releases/**",
-        "private/production_state/**"
-      ]
+      "includeFiles": "private/{releases,production_state}/**"
     },
     "api/download.js": {
-      "includeFiles": [
-        "private/releases/**",
-        "private/production_state/**"
-      ]
+      "includeFiles": "private/{releases,production_state}/**"
     }
   }
 }
