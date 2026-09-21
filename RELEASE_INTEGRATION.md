@@ -10,7 +10,9 @@ For a catalog product to become `released`, all of these must identify the same 
 4. Duplicate/family/originality checks.
 5. Canonical LaTeX source and a learner-facing XeLaTeX render with standard mathematical notation, embedded math fonts and no exposed source markup.
 6. Named human technical and visual signoff.
-7. PDF checksum recorded in the release manifest.
+7. Clean learner-facing question, solution and combined-pack PDFs with no review-only markings or internal audit IDs.
+8. Named-human authorization of those exact learner-artifact checksums.
+9. PDF checksums recorded in an immutable release manifest.
 
 Only then:
 
@@ -21,8 +23,12 @@ Only then:
 
 The same contract applies to future branches. Use a distinct paper code, syllabus map, blueprint, corpus and product IDs; never pool questions across branches by keyword alone.
 
-## Current upstream checkpoint — 2026-09-14
+## Current upstream checkpoint — 2026-09-20
 
-The Question Bank contains 87 unique candidates across Batches 001–005. All 87 pass Formatter, named-human batch QA, paper-eligibility certification and Corpus V1 admission. The Set 01 review checkpoint freezes 65 exact revisions and binds deterministic question, solution and fillable QA PDFs, but those complete-paper artifacts still await named-human technical and visual QA, reviewer-metadata reconfirmation and a separate release certificate. All 50 catalog products therefore remain `under_review` and non-purchasable.
+The Question Bank contains 87 unique candidates across Batches 001–005. All 87 pass Formatter, named-human batch QA, paper-eligibility certification and Corpus V1 admission. Set 01 whole-paper QA records 65 PASS / 0 REVISE / 0 REJECT and resolves the historical reviewer-metadata inconsistency. Aggregate Formatter release evidence records the same 65 revisions as PASS. Clean RC1 question, solution and combined learner-pack PDFs are staged privately and their hashes are enforced by tests.
 
-The machine-checked snapshot is `private/production_state/GATE_2027_EE_UPSTREAM_CHECKPOINT.json`. It is bound to Question Bank PRs #10/#11, Formatter PR #6, all five immutable batch evidence chains and the exact Set 01 review-package/artifact hashes. The supplied files do not expose the Question Bank PR #11 merge-commit identifier, so the checkpoint records the verified source-head and package/evidence hashes rather than inventing a commit. It is a deployment guard, not release authorization.
+RC1's exact question, solution and learner-pack checksums now have named-human release authorization. The immutable candidate and completed authorization record are staged privately and cross-checked by tests.
+
+Release authorization does not authorize sale. There is no approved price, sale authorization, promoted commercial release manifest or storefront activation. All 50 catalog products therefore remain `under_review` and non-purchasable.
+
+The machine-checked snapshot is `private/production_state/GATE_2027_EE_UPSTREAM_CHECKPOINT.json`. It is bound to Question Bank PRs #10/#11/#13/#15, Formatter PR #6, the supplied repository snapshots, all five immutable batch evidence chains, the completed whole-paper signoff, the exact RC1 artifact hashes and the completed authorization record. It is a deployment guard and does not activate commerce.

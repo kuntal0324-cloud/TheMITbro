@@ -6,7 +6,7 @@ A paper may enter `private/releases` only after a matching immutable release man
 
 See `SECURITY_AND_LAUNCH.md` before public launch.
 
-Current upstream review position (2026-09-14): 87 unique candidates are in the production program, and all 87 are individually human-certified, paper-eligible and admitted to Corpus V1. An exact 65-question / 100-mark / 180-minute Set 01 review manifest and checksum-bound review PDFs now exist, but the complete rendered paper has not passed named-human whole-paper QA or separate release certification. Zero complete/released sets exist and the catalog remains fully blocked. See `private/production_state/GATE_2027_EE_UPSTREAM_CHECKPOINT.json`.
+Current upstream position (2026-09-20): 87 unique candidates are individually human-certified, paper-eligible and admitted to Corpus V1. Set 01 has passed whole-paper QA at 65/65, and its exact RC1 question, solution and combined learner-pack checksums have received named-human release authorization. The immutable candidate and separate authorization record are staged under `private/release_candidates/`. They are deliberately not under `private/releases/`: no price, sale authorization or storefront activation has been approved. One complete release-authorized set and zero commercially released sets exist; all 50 catalog products remain blocked. See `private/production_state/GATE_2027_EE_UPSTREAM_CHECKPOINT.json`.
 
 ## Repository boundaries
 - Website: commerce and delivery only; branch-neutral product keys support future GATE paper codes.
