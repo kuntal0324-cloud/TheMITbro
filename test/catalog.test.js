@@ -10,6 +10,7 @@ import {
   getProduct,
   isPurchasable,
   publicCatalog,
+  publicCommercialOffers,
 } from "../api/_lib/catalog.js";
 import { hasCommercialReleaseFields } from "../api/_lib/release-integrity.js";
 
@@ -36,6 +37,7 @@ test("GATE 2027 EE is the only active 50-set program", () => {
 test("nothing can be purchased before a manifest-backed release", () => {
   assert.ok(Object.values(PRODUCTS).every(product => !isPurchasable(product)));
   assert.ok(Object.values(PRODUCTS).every(product => product.status === "under_review"));
+  assert.ok(Object.values(PRODUCTS).every(product => product.plannedPriceRupees === 29));
 });
 
 test("public catalog never exposes private paths or manifests", () => {
@@ -44,6 +46,56 @@ test("public catalog never exposes private paths or manifests", () => {
     assert.equal("releaseManifest" in product, false);
     assert.equal(product.purchasable, false);
   }
+});
+
+test("planned offers expose exact pricing and remain non-purchasable", () => {
+  assert.deepEqual(publicCommercialOffers(), [
+    {
+      id: "GATE_2027_EE_SINGLE_PAPER",
+      kind: "individual",
+      title: "Individual mock paper",
+      paperCount: 1,
+      plannedPriceRupees: 29,
+      effectivePriceRupees: 29,
+      individualEquivalentRupees: 29,
+      savingsRupees: 0,
+      savingsPercent: 0,
+      contentReadySets: 1,
+      commerciallyReleasedSets: 0,
+      status: "commercially_locked",
+      purchasable: false,
+    },
+    {
+      id: "GATE_2027_EE_PACK_20",
+      kind: "bundle",
+      title: "20-paper pack",
+      paperCount: 20,
+      plannedPriceRupees: 487,
+      effectivePriceRupees: 24.35,
+      individualEquivalentRupees: 580,
+      savingsRupees: 93,
+      savingsPercent: 16.03,
+      contentReadySets: 1,
+      commerciallyReleasedSets: 0,
+      status: "inventory_locked",
+      purchasable: false,
+    },
+    {
+      id: "GATE_2027_EE_PACK_50",
+      kind: "bundle",
+      title: "50-paper pack",
+      paperCount: 50,
+      plannedPriceRupees: 937,
+      effectivePriceRupees: 18.74,
+      individualEquivalentRupees: 1450,
+      savingsRupees: 513,
+      savingsPercent: 35.38,
+      contentReadySets: 1,
+      commerciallyReleasedSets: 0,
+      status: "inventory_locked",
+      purchasable: false,
+    },
+  ]);
 });
 
 test("release predicate requires every commercial field and verified artifact", () => {
@@ -226,5 +278,6 @@ test("frozen RC1 artifacts are separately authorized but remain non-purchasable"
   assert.equal(product.releaseManifest, null);
   assert.equal(product.privateFile, null);
   assert.equal(product.priceRupees, null);
+  assert.equal(product.plannedPriceRupees, 29);
   assert.equal(isPurchasable(product), false);
 });

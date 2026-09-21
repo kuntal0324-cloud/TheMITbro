@@ -1,24 +1,24 @@
 import crypto from "crypto";
-import Razorpay from "razorpay";
 import { getProduct, isPurchasable } from "./_lib/catalog.js";
 import { createDownloadToken } from "./_lib/download-token.js";
 export default async function handler(req,res){
  res.setHeader("Cache-Control","private, no-store");
  if(req.method!=="POST") return res.status(405).json({success:false,message:"Method Not Allowed"});
  try{
+  const {razorpay_order_id,razorpay_payment_id,razorpay_signature,paperId}=req.body||{};
+  if(!razorpay_order_id||!razorpay_payment_id||!razorpay_signature||!paperId) return res.status(400).json({success:false,message:"Missing payment details"});
+  const product=getProduct(paperId);
+  if(!isPurchasable(product)) return res.status(400).json({success:false,message:"Invalid or unreleased paper"});
   const keyId=process.env.RAZORPAY_KEY_ID, keySecret=process.env.RAZORPAY_KEY_SECRET;
   if(!keyId||!keySecret){
    console.error("Missing Razorpay environment variables");
    return res.status(500).json({success:false,message:"Payment service configuration is unavailable."});
   }
-  const {razorpay_order_id,razorpay_payment_id,razorpay_signature,paperId}=req.body||{};
-  if(!razorpay_order_id||!razorpay_payment_id||!razorpay_signature||!paperId) return res.status(400).json({success:false,message:"Missing payment details"});
-  const product=getProduct(paperId);
-  if(!isPurchasable(product)) return res.status(400).json({success:false,message:"Invalid or unreleased paper"});
   if(!/^[0-9a-f]{64}$/i.test(razorpay_signature)) return res.status(400).json({success:false,message:"Payment verification failed"});
   const expected=crypto.createHmac("sha256",keySecret).update(`${razorpay_order_id}|${razorpay_payment_id}`).digest("hex");
   const a=Buffer.from(razorpay_signature,"hex"), b=Buffer.from(expected,"hex");
   if(a.length!==b.length || !crypto.timingSafeEqual(a,b)) return res.status(400).json({success:false,message:"Payment verification failed"});
+  const {default:Razorpay}=await import("razorpay");
   const razorpay=new Razorpay({key_id:keyId,key_secret:keySecret});
   const [order,payment]=await Promise.all([razorpay.orders.fetch(razorpay_order_id),razorpay.payments.fetch(razorpay_payment_id)]);
   const amount=product.priceRupees*100;

@@ -30,8 +30,10 @@ The Question Bank contains 87 unique candidates across Batches 001–005. All 87
 
 RC1's exact question, solution and learner-pack checksums now have named-human release authorization. The immutable candidate and completed authorization record are staged privately and cross-checked by tests.
 
-Release authorization does not authorize sale. There is no approved price, sale authorization, promoted commercial release manifest or storefront activation. All 50 catalog products therefore remain `under_review` and non-purchasable.
+Release authorization does not authorize sale. The later commercial preflight now records the owner's planned individual price of ₹29, while the immutable earlier authorization correctly retains `price_set: false` because that document did not authorize a price. There is still no payment-mode decision, named sale authorization, promoted commercial release manifest, completed legal review or storefront activation. All 50 catalog products therefore remain `under_review` and non-purchasable.
 
 The machine-checked snapshot is `private/production_state/GATE_2027_EE_UPSTREAM_CHECKPOINT.json`. It is bound to Question Bank PRs #10/#11/#13/#15, Formatter PR #6, the supplied repository snapshots, all five immutable batch evidence chains, the completed whole-paper signoff, the exact RC1 artifact hashes and the latest supplied completed-authorization record. The newest Question Bank snapshot preserves the same reviewer fields and learner-artifact hashes but contains a newer completed-PDF serialization, so the website now binds its JSON, content and completed-PDF hashes. This checkpoint is a deployment guard and does not activate commerce.
 
 The separate Set 01 commercial preflight remains `READY_AWAITING_EXPLICIT_COMMERCIAL_DECISION`. Runtime integrity checks will reject a release unless the preflight becomes `COMMERCIAL_RELEASE_AUTHORIZED`, its self-hash matches, every commercial decision is complete, and the manifest and learner PDF match it exactly.
+
+The separate commercial catalog plan records the intended ₹29 individual, ₹487 20-paper and ₹937 50-paper offers. It is planning metadata only. Packs cannot be promoted until every included product is commercially released and bundle entitlement/delivery support exists.

@@ -41,12 +41,17 @@ test("Set 01 commercial preflight is self-consistent and bound to exact authoriz
   );
 });
 
-test("commercial decisions remain explicitly blocked", () => {
+test("selected price is recorded while launch decisions remain explicitly blocked", () => {
   assert.equal(preflight.status, "READY_AWAITING_EXPLICIT_COMMERCIAL_DECISION");
-  assert.equal(preflight.commercial_decision.price_rupees, null);
+  assert.equal(preflight.commercial_decision.price_rupees, 29);
   assert.equal(preflight.commercial_decision.sale_authorized, false);
   assert.equal(preflight.commercial_decision.storefront_activated, false);
   assert.equal(preflight.commercial_decision.payment_mode, null);
   assert.equal(preflight.commercial_decision.legal_and_refund_details_reviewed, false);
-  assert.ok(preflight.blockers.length >= 5);
+  assert.deepEqual(preflight.blockers, [
+    "Sale has not been explicitly authorized.",
+    "Storefront activation has not been explicitly authorized.",
+    "Payment mode has not been selected.",
+    "Legal and refund details have not been confirmed for launch.",
+  ]);
 });
