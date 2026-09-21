@@ -5,11 +5,16 @@
 - Removed JEE listings and limited the active catalog to GATE 2027 EE.
 - Added 50 branch-neutral planned product records using exam/year/paper-code/set identity.
 - Required `released` status, a release manifest, a private file and a positive server-side price before purchase.
+- Added runtime SHA-256 validation of the commercial manifest, commercial preflight and actual learner pack; a registry edit alone cannot enable purchase.
+- Added a release registry that is empty by default and keeps all 50 planned products blocked.
 - Released PDFs are stored only under `private/releases`, never `public/`.
 - Download links use short-lived HMAC tokens bound to the purchased `paperId` and Razorpay payment ID.
 - Payment verification checks Razorpay signature, order metadata, amount/currency, payment/order relationship and captured status.
 - Product price/availability has one server-side catalog.
 - Every current product is `under_review` and cannot be purchased.
+- Added checkout UI that remains disabled unless the server marks a product integrity-verified and purchasable.
+- Added pull-request CI for syntax, tests and dependency audit.
+- Added no-sniff, anti-framing, referrer and browser-permission response headers.
 - `node_modules/` is removed from source control.
 
 ## Required Vercel environment variables

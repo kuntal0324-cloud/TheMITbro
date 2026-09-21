@@ -6,7 +6,9 @@ A paper may enter `private/releases` only after a matching immutable release man
 
 See `SECURITY_AND_LAUNCH.md` before public launch.
 
-Current upstream position (2026-09-20): 87 unique candidates are individually human-certified, paper-eligible and admitted to Corpus V1. Set 01 has passed whole-paper QA at 65/65, and its exact RC1 question, solution and combined learner-pack checksums have received named-human release authorization. The immutable candidate and separate authorization record are staged under `private/release_candidates/`. They are deliberately not under `private/releases/`: no price, sale authorization or storefront activation has been approved. One complete release-authorized set and zero commercially released sets exist; all 50 catalog products remain blocked. See `private/production_state/GATE_2027_EE_UPSTREAM_CHECKPOINT.json`.
+Current upstream position (2026-09-21): 87 unique candidates are individually human-certified, paper-eligible and admitted to Corpus V1. Set 01 has passed whole-paper QA at 65/65, and its exact RC1 question, solution and combined learner-pack checksums have received named-human release authorization. The immutable candidate and latest supplied authorization record are staged under `private/release_candidates/`. They are deliberately not under `private/releases/`: no price, sale authorization or storefront activation has been approved. One complete release-authorized set and zero commercially released sets exist; all 50 catalog products remain blocked. See `private/production_state/GATE_2027_EE_UPSTREAM_CHECKPOINT.json` and `private/production_state/GATE_2027_EE_SET_01_COMMERCIAL_PREFLIGHT.json`.
+
+Runtime purchase eligibility is fail-closed. A positive catalog status is insufficient: the server revalidates the commercial manifest, signed commercial-preflight state and learner-pack SHA-256 before creating an order or serving a download.
 
 ## Repository boundaries
 - Website: commerce and delivery only; branch-neutral product keys support future GATE paper codes.

@@ -1,6 +1,6 @@
 {
   "checkpoint_contract": "GATE_2027_EE_UPSTREAM_CHECKPOINT_V4",
-  "as_of": "2026-09-20",
+  "as_of": "2026-09-21",
   "upstream_provenance": {
     "question_bank_repository": "kuntal0324-cloud/TheMITbro_Question_Bank",
     "question_bank_batch_004_005_human_qa_merge_pr": 10,
@@ -11,18 +11,20 @@
     "question_bank_set01_release_authorization_merge_pr": 15,
     "question_bank_set01_release_authorization_merge_commit_short": "55c00e2",
     "question_bank_rc1_candidate_source_snapshot_sha256": "e00d57c548c906a6fa6bdf59c750613571fcfb812cbe768f8396b61c25bb54c7",
+    "question_bank_supplied_snapshot_sha256": "04b9a826a43e75f91aadb6efa1b2e179b1f29cf4a6430a97f36e0be5f2e1eea3",
+    "question_bank_current_snapshot_sha256": "fd1dca934d33f5797c3173f082ee2b8a837f7a921d90f229f9ac49520a44622f",
     "question_bank_set01_review_package_sha256": "2859b4dfaa6e452a98143dbef4b05c1c5c4b2ce9074f6b450f8c96c5665cd4ee",
-    "release_authorization_json_file_sha256": "a920f083d70fe49e85ca9617eabd2d263568d4624610293903207802884650f8",
-    "release_authorization_content_sha256": "68431882dc192d701c98367686c189419e3a3b0a5cd09d9e5d344f31e4977b0f",
-    "release_authorization_completed_pdf_sha256": "6711d87852d05d4c809a4d40e764cc50e13cd7f2bccd6989eee9895add372db4",
+    "release_authorization_json_file_sha256": "68b4c5f41c3d832123dd18946c8d8ae55319fc1f5af6928f554f931b836402bd",
+    "release_authorization_content_sha256": "5b3a1adebf05b47d78012fe90ca328d1a20073dfaa64cd37debeabc10bb130b9",
+    "release_authorization_completed_pdf_sha256": "9f9551f861b512457d13dc0c3e971e1f33826fe798a4e2bb73aac719157188ad",
     "formatter_repository": "kuntal0324-cloud/TheMITBro_Formatter",
     "formatter_batch_004_005_merge_pr": 6,
     "formatter_main_merge_commit_short": "6f0f277",
-    "formatter_current_snapshot_sha256": "337758851d267ad02f927c6ee02cc6c58dad1e9ad8b130f9f8497f355511de73",
+    "formatter_current_snapshot_sha256": "695480ae74271fd1f04de8cada319846d0e050f3fce3e2d3e515ee99067cb82a",
     "formatter_state_sync_package_sha256": "9c0a615f8183b5c757af08842b3f9dc80b6a30f4548abd27cd0e835add6734d3",
-    "eight_day_progress_sha256": "6ca7a53f3ff97fe10c699edb4d67131c7da67507cd35dc856594e441d8e272a4",
+    "eight_day_progress_sha256": "69acd8ac7e99e5c2b066fe23e660c86373f00561eaf7e0ab0a59ee454d8c740d",
     "family_registry_sha256": "5f13541f04ceed9e8fdd12f6daaf15f53ee53d9259f925c340a7b2efec7ae7a7",
-    "provenance_note": "Immutable candidate and authorization hashes are authoritative. Question Bank PR #15 merged the completed exact-artifact authorization as commit 55c00e2. The RC1 candidate source snapshot remains separately identified; no newer repository archive hash is invented."
+    "provenance_note": "Question Bank PR #15 established exact-artifact authorization. The 2026-09-21 supplied main snapshot retains the same reviewer fields and learner-artifact bindings but contains the latest completed-authorization PDF serialization; its JSON, content and PDF hashes are authoritative for this checkpoint."
   },
   "question_bank": {
     "batch_001": {
@@ -135,9 +137,9 @@
     "release_solution_pdf_sha256": "8ba106686bbb7b405de96dfb9ab6308bdf4e93b958882cafb67360a7fb4e1f19",
     "release_learner_pack_pdf_sha256": "f6526a7ed7a16e12339f12206a8ca4ec88c5177f159f9a276ef3f2ef4298be58",
     "release_authorization_template_pdf_sha256": "a907ead03a603a358bfd62ee1bc4620d2a6ad887ab0c47e8f936e18b480b53f3",
-    "release_authorization_json_file_sha256": "a920f083d70fe49e85ca9617eabd2d263568d4624610293903207802884650f8",
-    "release_authorization_content_sha256": "68431882dc192d701c98367686c189419e3a3b0a5cd09d9e5d344f31e4977b0f",
-    "release_authorization_completed_pdf_sha256": "6711d87852d05d4c809a4d40e764cc50e13cd7f2bccd6989eee9895add372db4",
+    "release_authorization_json_file_sha256": "68b4c5f41c3d832123dd18946c8d8ae55319fc1f5af6928f554f931b836402bd",
+    "release_authorization_content_sha256": "5b3a1adebf05b47d78012fe90ca328d1a20073dfaa64cd37debeabc10bb130b9",
+    "release_authorization_completed_pdf_sha256": "9f9551f861b512457d13dc0c3e971e1f33826fe798a4e2bb73aac719157188ad",
     "questions": 65,
     "marks": 100,
     "duration_minutes": 180,

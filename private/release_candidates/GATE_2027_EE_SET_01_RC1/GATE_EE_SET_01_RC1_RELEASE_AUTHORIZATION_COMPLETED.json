@@ -19,7 +19,7 @@
   },
   "completed_pdf": {
     "path": "output/pdf/GATE_EE_SET_01_RELEASE_AUTHORIZATION_COMPLETED.pdf",
-    "sha256": "6711d87852d05d4c809a4d40e764cc50e13cd7f2bccd6989eee9895add372db4"
+    "sha256": "9f9551f861b512457d13dc0c3e971e1f33826fe798a4e2bb73aac719157188ad"
   },
   "reviewer": {
     "name": "Kuntal Das",
@@ -43,5 +43,5 @@
   "price_set": false,
   "storefront_activated": false,
   "sale_authorized": false,
-  "authorization_content_sha256": "68431882dc192d701c98367686c189419e3a3b0a5cd09d9e5d344f31e4977b0f"
+  "authorization_content_sha256": "5b3a1adebf05b47d78012fe90ca328d1a20073dfaa64cd37debeabc10bb130b9"
 }
