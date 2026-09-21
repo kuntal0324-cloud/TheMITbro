@@ -1,7 +1,9 @@
 import Razorpay from "razorpay";
+import { randomBytes } from "node:crypto";
 import { getProduct, isPurchasable } from "./_lib/catalog.js";
 
 export default async function handler(req, res) {
+  res.setHeader("Cache-Control", "private, no-store");
   if (req.method !== "POST") {
     return res.status(405).json({
       success: false,
@@ -14,17 +16,11 @@ export default async function handler(req, res) {
     const keySecret = process.env.RAZORPAY_KEY_SECRET;
 
     if (!keyId || !keySecret) {
-  console.error("Missing Razorpay environment variables", {
-    hasKeyId: Boolean(keyId),
-    hasKeySecret: Boolean(keySecret)
-  });
-
-  return res.status(500).json({
-    success: false,
-    message: "Payment service configuration is unavailable.",
-    hasKeyId: Boolean(keyId),
-    hasKeySecret: Boolean(keySecret)
-  });
+      console.error("Missing Razorpay environment variables");
+      return res.status(500).json({
+        success: false,
+        message: "Payment service configuration is unavailable."
+      });
     }
 
     const razorpay = new Razorpay({
@@ -47,7 +43,7 @@ export default async function handler(req, res) {
     const order = await razorpay.orders.create({
       amount: product.priceRupees * 100,
       currency: "INR",
-      receipt: `receipt_${paperId}_${Date.now()}`,
+      receipt: `tmb_${Date.now().toString(36)}_${randomBytes(4).toString("hex")}`,
       notes: {
         paperId
       }

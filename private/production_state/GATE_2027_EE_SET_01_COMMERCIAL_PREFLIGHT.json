@@ -1,0 +1,42 @@
+{
+  "preflight_contract": "GATE_2027_COMMERCIAL_PREFLIGHT_V1",
+  "as_of": "2026-09-21",
+  "product_id": "GATE_2027_EE_SET_01",
+  "candidate_id": "GATE_2027_EE_SET_01_RC1",
+  "upstream": {
+    "candidate_manifest_file_sha256": "95dd91c46eed40b5c7e53d5f4c6eaf09f5129b657281cd03767956beb1758f49",
+    "candidate_content_sha256": "3c719fe424b564ca4843b334588046be3e3ba428ce62cf58b5c615dddad2346e",
+    "release_authorization_json_file_sha256": "68b4c5f41c3d832123dd18946c8d8ae55319fc1f5af6928f554f931b836402bd",
+    "release_authorization_content_sha256": "5b3a1adebf05b47d78012fe90ca328d1a20073dfaa64cd37debeabc10bb130b9",
+    "release_authorization_completed_pdf_sha256": "9f9551f861b512457d13dc0c3e971e1f33826fe798a4e2bb73aac719157188ad",
+    "question_pdf_sha256": "5479e90058e363f3c67494753c3c860540177ef2e84713eb9bec13595c2f9491",
+    "solution_pdf_sha256": "8ba106686bbb7b405de96dfb9ab6308bdf4e93b958882cafb67360a7fb4e1f19",
+    "learner_pack_sha256": "f6526a7ed7a16e12339f12206a8ca4ec88c5177f159f9a276ef3f2ef4298be58"
+  },
+  "readiness": {
+    "official_blueprint": "PASS",
+    "formatter_release_qualification": "PASS_65_OF_65",
+    "whole_paper_human_qa": "PASS_65_OF_65",
+    "learner_artifact_validation": "PASS",
+    "exact_artifact_release_authorization": "PASS"
+  },
+  "commercial_decision": {
+    "currency": "INR",
+    "price_rupees": null,
+    "sale_authorized": false,
+    "storefront_activated": false,
+    "payment_mode": null,
+    "authorized_by": null,
+    "authorization_date": null,
+    "legal_and_refund_details_reviewed": false
+  },
+  "status": "READY_AWAITING_EXPLICIT_COMMERCIAL_DECISION",
+  "blockers": [
+    "Price has not been selected.",
+    "Sale has not been explicitly authorized.",
+    "Storefront activation has not been explicitly authorized.",
+    "Payment mode has not been selected.",
+    "Legal and refund details have not been confirmed for launch."
+  ],
+  "preflight_content_sha256": "ce2b3be9285ddeb44c8044777cb648e7c940399359ffbb3ccaa1c40a47dabc21"
+}

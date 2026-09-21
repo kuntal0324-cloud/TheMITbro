@@ -2,7 +2,16 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
-import { ACTIVE_PROGRAM, PRODUCTS, getProduct, isPurchasable, publicCatalog } from "../api/_lib/catalog.js";
+import {
+  ACTIVE_PROGRAM,
+  ACTIVE_PROGRAMS,
+  PRODUCTS,
+  RELEASE_REGISTRY,
+  getProduct,
+  isPurchasable,
+  publicCatalog,
+} from "../api/_lib/catalog.js";
+import { hasCommercialReleaseFields } from "../api/_lib/release-integrity.js";
 
 const upstreamCheckpoint = JSON.parse(readFileSync(
   new URL("../private/production_state/GATE_2027_EE_UPSTREAM_CHECKPOINT.json", import.meta.url),
@@ -19,6 +28,7 @@ const sha256 = value => createHash("sha256").update(value).digest("hex");
 test("GATE 2027 EE is the only active 50-set program", () => {
   assert.equal(ACTIVE_PROGRAM.paperCode, "EE");
   assert.equal(ACTIVE_PROGRAM.examYear, 2027);
+  assert.equal(ACTIVE_PROGRAMS.length, 1);
   assert.equal(Object.keys(PRODUCTS).length, 50);
   assert.ok(Object.values(PRODUCTS).every(p => p.examFamily === "GATE" && p.paperCode === "EE"));
 });
@@ -36,16 +46,19 @@ test("public catalog never exposes private paths or manifests", () => {
   }
 });
 
-test("release predicate requires every commercial gate", () => {
+test("release predicate requires every commercial field and verified artifact", () => {
   const draft = getProduct("GATE_2027_EE_SET_01");
   assert.equal(isPurchasable({ ...draft, status: "released" }), false);
-  assert.equal(isPurchasable({
+  const superficiallyReleased = {
     ...draft,
     status: "released",
     releaseManifest: "GATE_2027_EE_SET_01.release.json",
     privateFile: "GATE_2027_EE_SET_01.pdf",
     priceRupees: 500,
-  }), true);
+  };
+  assert.equal(hasCommercialReleaseFields(superficiallyReleased), true);
+  assert.equal(isPurchasable(superficiallyReleased), false);
+  assert.deepEqual(RELEASE_REGISTRY.products, {});
 });
 
 test("release authorization is recorded while every commercial gate remains blocked", () => {
@@ -100,7 +113,15 @@ test("upstream checkpoint is bound to all five batch chains and Set 01 review ar
   const batch5 = upstreamCheckpoint.question_bank.batch_005;
   const set01 = upstreamCheckpoint.set_01_review_checkpoint;
 
-  assert.equal(upstreamCheckpoint.as_of, "2026-09-20");
+  assert.equal(upstreamCheckpoint.as_of, "2026-09-21");
+  assert.equal(
+    provenance.question_bank_current_snapshot_sha256,
+    "fd1dca934d33f5797c3173f082ee2b8a837f7a921d90f229f9ac49520a44622f",
+  );
+  assert.equal(
+    provenance.question_bank_supplied_snapshot_sha256,
+    "04b9a826a43e75f91aadb6efa1b2e179b1f29cf4a6430a97f36e0be5f2e1eea3",
+  );
   assert.equal(provenance.question_bank_batch_004_005_human_qa_merge_pr, 10);
   assert.equal(provenance.question_bank_batch_004_005_human_qa_merge_commit_short, "d107a8c");
   assert.equal(provenance.question_bank_paper_eligibility_merge_pr, 11);

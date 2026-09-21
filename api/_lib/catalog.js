@@ -1,30 +1,57 @@
-const PROGRAM = Object.freeze({
-  examFamily: "GATE",
-  examYear: 2027,
-  paperCode: "EE",
-  branch: "Electrical Engineering",
-  setCount: 50,
-});
+import { readFileSync } from "node:fs";
+import { hasCommercialReleaseFields, validateReleaseIntegrity } from "./release-integrity.js";
 
-function plannedProduct(setNumber) {
+const PROGRAMS = Object.freeze([
+  Object.freeze({
+    examFamily: "GATE",
+    examYear: 2027,
+    paperCode: "EE",
+    branch: "Electrical Engineering",
+    setCount: 50,
+  }),
+]);
+
+const registry = JSON.parse(readFileSync(
+  new URL("../../private/releases/RELEASE_REGISTRY.json", import.meta.url),
+  "utf8",
+));
+if (registry.registry_contract !== "THEMITBRO_RELEASE_REGISTRY_V1") {
+  throw new Error("Release registry contract mismatch");
+}
+const RELEASES = Object.freeze(registry.products || {});
+const plannedIds = new Set(PROGRAMS.flatMap(program => (
+  Array.from({ length: program.setCount }, (_, index) => (
+    `${program.examFamily}_${program.examYear}_${program.paperCode}_SET_${String(index + 1).padStart(2, "0")}`
+  ))
+)));
+for (const productId of Object.keys(RELEASES)) {
+  if (!plannedIds.has(productId)) {
+    throw new Error(`Release registry contains unknown product: ${productId}`);
+  }
+}
+
+function plannedProduct(program, setNumber) {
   const number = String(setNumber).padStart(2, "0");
+  const id = `${program.examFamily}_${program.examYear}_${program.paperCode}_SET_${number}`;
+  const release = RELEASES[id] || {};
   return Object.freeze({
-    id: `GATE_2027_EE_SET_${number}`,
-    title: `GATE 2027 EE — Mock Set ${number}`,
-    ...PROGRAM,
+    id,
+    title: `${program.examFamily} ${program.examYear} ${program.paperCode} — Mock Set ${number}`,
+    ...program,
     setNumber,
-    priceRupees: null,
-    status: "under_review",
-    releaseManifest: null,
-    privateFile: null,
+    priceRupees: release.priceRupees ?? null,
+    status: release.status ?? "under_review",
+    releaseManifest: release.releaseManifest ?? null,
+    privateFile: release.privateFile ?? null,
   });
 }
 
-// This shape is branch-neutral: add another program by constructing products
-// with a different paperCode/branch. GATE 2027 EE is the only active scope.
+// Add a future branch as a separate program. Its paper code, syllabus,
+// blueprint, corpus and release registry entries remain isolated from EE.
 export const PRODUCTS = Object.freeze(Object.fromEntries(
-  Array.from({ length: PROGRAM.setCount }, (_, index) => plannedProduct(index + 1))
-    .map(product => [product.id, product]),
+  PROGRAMS.flatMap(program => (
+    Array.from({ length: program.setCount }, (_, index) => plannedProduct(program, index + 1))
+  )).map(product => [product.id, product]),
 ));
 
 export function getProduct(id) {
@@ -32,14 +59,7 @@ export function getProduct(id) {
 }
 
 export function isPurchasable(product) {
-  return Boolean(
-    product &&
-    product.status === "released" &&
-    product.releaseManifest &&
-    product.privateFile &&
-    Number.isInteger(product.priceRupees) &&
-    product.priceRupees > 0
-  );
+  return hasCommercialReleaseFields(product) && validateReleaseIntegrity(product).valid;
 }
 
 export function publicCatalog() {
@@ -49,4 +69,6 @@ export function publicCatalog() {
   }));
 }
 
-export const ACTIVE_PROGRAM = PROGRAM;
+export const ACTIVE_PROGRAM = PROGRAMS[0];
+export const ACTIVE_PROGRAMS = PROGRAMS;
+export const RELEASE_REGISTRY = registry;
