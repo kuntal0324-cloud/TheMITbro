@@ -1,4 +1,11 @@
 {
   "registry_contract": "THEMITBRO_RELEASE_REGISTRY_V1",
-  "products": {}
+  "products": {
+    "GATE_2027_EE_SET_01": {
+      "status": "released",
+      "priceRupees": 29,
+      "releaseManifest": "GATE_2027_EE_SET_01.release.json",
+      "privateFile": "GATE_2027_EE_SET_01.pdf"
+    }
+  }
 }

@@ -72,6 +72,9 @@ export function publicOfferPlans({ contentReadySets, commerciallyReleasedSets })
     const individualEquivalentRupees = individual.price_rupees * offer.paper_count;
     const savingsRupees = individualEquivalentRupees - offer.price_rupees;
     const inventoryReady = contentReadySets >= offer.paper_count;
+    const status = offer.kind === "individual" && commerciallyReleasedSets > 0
+      ? "available_via_listings"
+      : inventoryReady ? "commercially_locked" : "inventory_locked";
     return {
       id: offer.id,
       kind: offer.kind,
@@ -84,7 +87,7 @@ export function publicOfferPlans({ contentReadySets, commerciallyReleasedSets })
       savingsPercent: Number(((savingsRupees / individualEquivalentRupees) * 100).toFixed(2)),
       contentReadySets: Math.min(contentReadySets, offer.paper_count),
       commerciallyReleasedSets: Math.min(commerciallyReleasedSets, offer.paper_count),
-      status: inventoryReady ? "commercially_locked" : "inventory_locked",
+      status,
       purchasable: false,
     };
   });

@@ -12,7 +12,10 @@ import {
   publicCatalog,
   publicCommercialOffers,
 } from "../api/_lib/catalog.js";
-import { hasCommercialReleaseFields } from "../api/_lib/release-integrity.js";
+import {
+  hasCommercialReleaseFields,
+  validateReleaseIntegrity,
+} from "../api/_lib/release-integrity.js";
 
 const upstreamCheckpoint = JSON.parse(readFileSync(
   new URL("../private/production_state/GATE_2027_EE_UPSTREAM_CHECKPOINT.json", import.meta.url),
@@ -34,9 +37,29 @@ test("GATE 2027 EE is the only active 50-set program", () => {
   assert.ok(Object.values(PRODUCTS).every(p => p.examFamily === "GATE" && p.paperCode === "EE"));
 });
 
-test("nothing can be purchased before a manifest-backed release", () => {
-  assert.ok(Object.values(PRODUCTS).every(product => !isPurchasable(product)));
-  assert.ok(Object.values(PRODUCTS).every(product => product.status === "under_review"));
+test("controlled-test registry releases exact Set 01 only", () => {
+  const released = getProduct("GATE_2027_EE_SET_01");
+  const unreleased = Object.values(PRODUCTS).filter(product => product.id !== released.id);
+
+  assert.deepEqual(RELEASE_REGISTRY.products, {
+    GATE_2027_EE_SET_01: {
+      status: "released",
+      priceRupees: 29,
+      releaseManifest: "GATE_2027_EE_SET_01.release.json",
+      privateFile: "GATE_2027_EE_SET_01.pdf",
+    },
+  });
+  assert.equal(released.status, "released");
+  assert.equal(released.priceRupees, 29);
+  assert.equal(released.releaseManifest, "GATE_2027_EE_SET_01.release.json");
+  assert.equal(released.privateFile, "GATE_2027_EE_SET_01.pdf");
+  const testIntegrity = validateReleaseIntegrity(released, { paymentMode: "test" });
+  assert.equal(testIntegrity.valid, true, testIntegrity.errors.join("; "));
+  assert.equal(validateReleaseIntegrity(released, { paymentMode: "live" }).valid, false);
+  assert.equal(unreleased.length, 49);
+  assert.ok(unreleased.every(product => product.status === "under_review"));
+  assert.ok(unreleased.every(product => !hasCommercialReleaseFields(product)));
+  assert.ok(unreleased.every(product => !isPurchasable(product)));
   assert.ok(Object.values(PRODUCTS).every(product => product.plannedPriceRupees === 29));
 });
 
@@ -110,10 +133,17 @@ test("release predicate requires every commercial field and verified artifact", 
   };
   assert.equal(hasCommercialReleaseFields(superficiallyReleased), true);
   assert.equal(isPurchasable(superficiallyReleased), false);
-  assert.deepEqual(RELEASE_REGISTRY.products, {});
+  assert.deepEqual(RELEASE_REGISTRY.products, {
+    GATE_2027_EE_SET_01: {
+      status: "released",
+      priceRupees: 29,
+      releaseManifest: "GATE_2027_EE_SET_01.release.json",
+      privateFile: "GATE_2027_EE_SET_01.pdf",
+    },
+  });
 });
 
-test("release authorization is recorded while every commercial gate remains blocked", () => {
+test("immutable upstream checkpoint remains bound while Set 01 has a controlled-test overlay", () => {
   assert.equal(upstreamCheckpoint.checkpoint_contract, "GATE_2027_EE_UPSTREAM_CHECKPOINT_V4");
   assert.equal(upstreamCheckpoint.release_authorized, true);
   assert.equal(upstreamCheckpoint.program_totals.unique_candidates, 87);
@@ -149,7 +179,15 @@ test("release authorization is recorded while every commercial gate remains bloc
   assert.equal(upstreamCheckpoint.set_01_review_checkpoint.price_set, false);
   assert.equal(upstreamCheckpoint.set_01_review_checkpoint.storefront_activated, false);
   assert.equal(upstreamCheckpoint.set_01_review_checkpoint.sale_authorized, false);
-  assert.ok(Object.values(PRODUCTS).every(product => (
+  const controlledTestProduct = getProduct("GATE_2027_EE_SET_01");
+  const controlledTestIntegrity = validateReleaseIntegrity(
+    controlledTestProduct,
+    { paymentMode: "test" },
+  );
+  assert.equal(controlledTestIntegrity.valid, true, controlledTestIntegrity.errors.join("; "));
+  assert.ok(Object.values(PRODUCTS).filter(product => (
+    product.id !== controlledTestProduct.id
+  )).every(product => (
     product.status === upstreamCheckpoint.catalog_required_status &&
     !isPurchasable(product)
   )));
@@ -241,7 +279,7 @@ test("upstream checkpoint is bound to all five batch chains and Set 01 review ar
   assert.equal(batches.reduce((total, batch) => total + batch.corpus_admitted, 0), upstreamCheckpoint.program_totals.corpus_admitted);
 });
 
-test("frozen RC1 artifacts are separately authorized but remain non-purchasable", () => {
+test("frozen RC1 artifacts remain hash-bound after controlled-test promotion", () => {
   const set01 = upstreamCheckpoint.set_01_review_checkpoint;
   assert.equal(releaseCandidate.candidate_id, "GATE_2027_EE_SET_01_RC1");
   assert.equal(releaseCandidate.status, "RELEASE_CANDIDATE_AWAITING_EXACT_ARTIFACT_AUTHORIZATION");
@@ -274,10 +312,12 @@ test("frozen RC1 artifacts are separately authorized but remain non-purchasable"
     assert.equal(digest, set01[checkpointField]);
   }
   const product = getProduct("GATE_2027_EE_SET_01");
-  assert.equal(product.status, "under_review");
-  assert.equal(product.releaseManifest, null);
-  assert.equal(product.privateFile, null);
-  assert.equal(product.priceRupees, null);
+  assert.equal(product.status, "released");
+  assert.equal(product.releaseManifest, "GATE_2027_EE_SET_01.release.json");
+  assert.equal(product.privateFile, "GATE_2027_EE_SET_01.pdf");
+  assert.equal(product.priceRupees, 29);
   assert.equal(product.plannedPriceRupees, 29);
-  assert.equal(isPurchasable(product), false);
+  const testIntegrity = validateReleaseIntegrity(product, { paymentMode: "test" });
+  assert.equal(testIntegrity.valid, true, testIntegrity.errors.join("; "));
+  assert.equal(validateReleaseIntegrity(product, { paymentMode: "live" }).valid, false);
 });

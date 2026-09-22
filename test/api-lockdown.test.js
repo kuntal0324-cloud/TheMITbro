@@ -34,6 +34,13 @@ test("catalog API exposes locked planned offers without private release fields",
   assert.ok(state.body.products.every(product => product.purchasable === false));
   assert.ok(state.body.offers.every(offer => offer.purchasable === false));
   assert.ok(state.body.products.every(product => !("privateFile" in product) && !("releaseManifest" in product)));
+  assert.deepEqual(state.body.commerce, {
+    activeProductId: null,
+    paymentMode: null,
+    testOnly: false,
+    businessDetails: null,
+  });
+  assert.doesNotMatch(JSON.stringify(state.body), /private\/|releaseManifest|authorizationRecord/);
 });
 
 test("order, verification and download routes reject Set 01 before provider access", async () => {

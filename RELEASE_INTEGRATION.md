@@ -13,7 +13,8 @@ For a catalog product to become `released`, all of these must identify the same 
 7. Clean learner-facing question, solution and combined-pack PDFs with no review-only markings or internal audit IDs.
 8. Named-human authorization of those exact learner-artifact checksums.
 9. Explicit price, payment-mode, sale, storefront and legal/refund decisions recorded in a self-hashed commercial preflight.
-10. PDF checksums and the commercial-preflight hash recorded in an immutable release manifest.
+10. A separate self-hashed owner authorization containing verified seller/contact/grievance details, policy-review confirmations and a fixed test/live/bundle scope.
+11. PDF, preflight and owner-authorization checksums recorded in an immutable release manifest.
 
 Only then:
 
@@ -34,6 +35,6 @@ Release authorization does not authorize sale. The later commercial preflight no
 
 The machine-checked snapshot is `private/production_state/GATE_2027_EE_UPSTREAM_CHECKPOINT.json`. It is bound to Question Bank PRs #10/#11/#13/#15, Formatter PR #6, the supplied repository snapshots, all five immutable batch evidence chains, the completed whole-paper signoff, the exact RC1 artifact hashes and the latest supplied completed-authorization record. The newest Question Bank snapshot preserves the same reviewer fields and learner-artifact hashes but contains a newer completed-PDF serialization, so the website now binds its JSON, content and completed-PDF hashes. This checkpoint is a deployment guard and does not activate commerce.
 
-The separate Set 01 commercial preflight remains `READY_AWAITING_EXPLICIT_COMMERCIAL_DECISION`. Runtime integrity checks will reject a release unless the preflight becomes `COMMERCIAL_RELEASE_AUTHORIZED`, its self-hash matches, every commercial decision is complete, and the manifest and learner PDF match it exactly.
+The separate Set 01 commercial preflight remains `READY_AWAITING_EXPLICIT_COMMERCIAL_DECISION`. A mobile-fillable controlled-test authorization packet and deterministic import/promotion workflow are now present, but the completed owner record is intentionally absent. Runtime integrity checks reject a release unless the preflight becomes `COMMERCIAL_RELEASE_AUTHORIZED`, the completed owner record is self-hashed and bound to the exact RC1 hashes, every decision is complete, the runtime payment mode and Razorpay key type agree, and the manifest and learner PDF match exactly.
 
 The separate commercial catalog plan records the intended ₹29 individual, ₹487 20-paper and ₹937 50-paper offers. It is planning metadata only. Packs cannot be promoted until every included product is commercially released and bundle entitlement/delivery support exists.

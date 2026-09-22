@@ -13,6 +13,13 @@ const authorizationPath = new URL(
   import.meta.url,
 );
 const authorization = JSON.parse(readFileSync(authorizationPath, "utf8"));
+const commercialAuthorization = JSON.parse(readFileSync(
+  new URL(
+    "../private/production_state/GATE_2027_EE_SET_01_COMMERCIAL_AUTHORIZATION_COMPLETED.json",
+    import.meta.url,
+  ),
+  "utf8",
+));
 const sha256 = value => createHash("sha256").update(value).digest("hex");
 
 test("Set 01 commercial preflight is self-consistent and bound to exact authorization", () => {
@@ -41,17 +48,20 @@ test("Set 01 commercial preflight is self-consistent and bound to exact authoriz
   );
 });
 
-test("selected price is recorded while launch decisions remain explicitly blocked", () => {
-  assert.equal(preflight.status, "READY_AWAITING_EXPLICIT_COMMERCIAL_DECISION");
+test("controlled-test commercial decision is explicit and remains test-only", () => {
+  assert.equal(preflight.status, "COMMERCIAL_RELEASE_AUTHORIZED");
   assert.equal(preflight.commercial_decision.price_rupees, 29);
-  assert.equal(preflight.commercial_decision.sale_authorized, false);
-  assert.equal(preflight.commercial_decision.storefront_activated, false);
-  assert.equal(preflight.commercial_decision.payment_mode, null);
-  assert.equal(preflight.commercial_decision.legal_and_refund_details_reviewed, false);
-  assert.deepEqual(preflight.blockers, [
-    "Sale has not been explicitly authorized.",
-    "Storefront activation has not been explicitly authorized.",
-    "Payment mode has not been selected.",
-    "Legal and refund details have not been confirmed for launch.",
-  ]);
+  assert.equal(preflight.commercial_decision.sale_authorized, true);
+  assert.equal(preflight.commercial_decision.storefront_activated, true);
+  assert.equal(preflight.commercial_decision.payment_mode, "test");
+  assert.equal(preflight.commercial_decision.legal_and_refund_details_reviewed, true);
+  assert.equal(
+    preflight.commercial_decision.authorized_by,
+    commercialAuthorization.decision.authorized_by,
+  );
+  assert.equal(
+    preflight.commercial_decision.authorization_date,
+    commercialAuthorization.decision.authorization_date,
+  );
+  assert.deepEqual(preflight.blockers, []);
 });

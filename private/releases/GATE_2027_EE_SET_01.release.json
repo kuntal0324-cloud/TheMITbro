@@ -1,0 +1,34 @@
+{
+  "release_contract": "THEMITBRO_COMMERCIAL_RELEASE_V1",
+  "product_id": "GATE_2027_EE_SET_01",
+  "paper_id": "GATE_2027_EE_SET_01",
+  "candidate_id": "GATE_2027_EE_SET_01_RC1",
+  "status": "RELEASED",
+  "currency": "INR",
+  "price_rupees": 29,
+  "commercial_preflight": {
+    "file": "GATE_2027_EE_SET_01_COMMERCIAL_PREFLIGHT.json",
+    "content_sha256": "1834c859fa30a6f5adce34e2c09babc2668f9e0a6cf7572862a92876e623d6c2"
+  },
+  "commercial_authorization_record": {
+    "file": "GATE_2027_EE_SET_01_COMMERCIAL_AUTHORIZATION_COMPLETED.json",
+    "content_sha256": "3b4d3fca126e01759a4ba563f86eff6c446aa19894d1008a5e77acf4ab0ac9d7"
+  },
+  "learner_pack": {
+    "file": "GATE_2027_EE_SET_01.pdf",
+    "sha256": "f6526a7ed7a16e12339f12206a8ca4ec88c5177f159f9a276ef3f2ef4298be58"
+  },
+  "upstream": {
+    "candidate_content_sha256": "3c719fe424b564ca4843b334588046be3e3ba428ce62cf58b5c615dddad2346e",
+    "release_authorization_content_sha256": "5b3a1adebf05b47d78012fe90ca328d1a20073dfaa64cd37debeabc10bb130b9"
+  },
+  "commercial_authorization": {
+    "sale_authorized": true,
+    "storefront_activated": true,
+    "payment_mode": "test",
+    "authorized_by": "Kuntal Das",
+    "authorization_date": "2026-09-21",
+    "legal_and_refund_details_reviewed": true
+  },
+  "release_content_sha256": "02a2affcba2b1de24c4a76a9ff80085885b9fcaeba200e7700a3a127716358cb"
+}
