@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import {
@@ -63,6 +63,62 @@ function fixture() {
   const preflightFile = "GATE_2027_EE_SET_01_COMMERCIAL_PREFLIGHT.json";
   writeJson(path.join(stateRoot, preflightFile), preflight);
 
+  const authorizationRecord = {
+    authorization_contract: "GATE_2027_EE_SET01_COMMERCIAL_AUTHORIZATION_V1",
+    product_id: product.id,
+    candidate_id: preflight.candidate_id,
+    status: "AUTHORIZED_FOR_CONTROLLED_TEST_RELEASE",
+    test_release_authorized: true,
+    live_release_authorized: false,
+    bundle_sales_authorized: false,
+    basis: {
+      candidate_content_sha256: preflight.upstream.candidate_content_sha256,
+      release_authorization_content_sha256:
+        preflight.upstream.release_authorization_content_sha256,
+      learner_pack_sha256: sha256(learnerBytes),
+    },
+    commercial_terms: {
+      currency: "INR",
+      price_rupees: product.priceRupees,
+      payment_mode: "test",
+      learner_pack_sha256: sha256(learnerBytes),
+    },
+    seller_identity: {
+      legal_seller_name: "Test Seller",
+      trading_name: "TheMITbro",
+      principal_geographic_address: "1 Test Road, Kolkata, West Bengal 700001, India",
+      customer_care_email: "support@example.test",
+      customer_care_phone: "+91 90000 00000",
+      grievance_officer_name: "Test Officer",
+      grievance_email: "grievance@example.test",
+      grievance_phone: "+91 90000 00001",
+      business_tax_identifiers: "Not applicable in test fixture",
+    },
+    policy_review: {
+      privacy_reviewed: true,
+      terms_reviewed: true,
+      refund_reviewed: true,
+      contact_reviewed: true,
+      review_date: "2026-09-21",
+    },
+    decision: {
+      sale_authorized: true,
+      storefront_activated: true,
+      payment_mode: "test",
+      legal_and_refund_details_reviewed: true,
+      authorized_by: "Release owner",
+      role_or_authority: "Owner",
+      authorization_date: "2026-09-21",
+      signature: "Release owner",
+    },
+  };
+  authorizationRecord.authorization_content_sha256 = contentSha256(
+    authorizationRecord,
+    "authorization_content_sha256",
+  );
+  const authorizationFile = "GATE_2027_EE_SET_01_COMMERCIAL_AUTHORIZATION_COMPLETED.json";
+  writeJson(path.join(stateRoot, authorizationFile), authorizationRecord);
+
   const manifest = {
     release_contract: "THEMITBRO_COMMERCIAL_RELEASE_V1",
     product_id: product.id,
@@ -75,6 +131,10 @@ function fixture() {
       file: preflightFile,
       content_sha256: preflight.preflight_content_sha256,
     },
+    commercial_authorization_record: {
+      file: authorizationFile,
+      content_sha256: authorizationRecord.authorization_content_sha256,
+    },
     learner_pack: {
       file: product.privateFile,
       sha256: sha256(learnerBytes),
@@ -84,13 +144,16 @@ function fixture() {
   };
   manifest.release_content_sha256 = contentSha256(manifest);
   writeJson(path.join(releaseRoot, product.releaseManifest), manifest);
-  return { root, product, manifest, learnerBytes };
+  return { root, product, manifest, learnerBytes, authorizationFile };
 }
 
 test("complete manifest, preflight and learner pack pass together", t => {
   const value = fixture();
   t.after(() => rmSync(value.root, { recursive: true, force: true }));
-  const result = validateReleaseIntegrity(value.product, { root: value.root });
+  const result = validateReleaseIntegrity(value.product, {
+    root: value.root,
+    paymentMode: "test",
+  });
   assert.equal(result.valid, true, result.errors.join("; "));
 });
 
@@ -101,9 +164,44 @@ test("learner-pack tampering fails closed", t => {
     path.join(value.root, "private", "releases", value.product.privateFile),
     Buffer.concat([value.learnerBytes, Buffer.from(" tampered")]),
   );
-  const result = validateReleaseIntegrity(value.product, { root: value.root });
+  const result = validateReleaseIntegrity(value.product, {
+    root: value.root,
+    paymentMode: "test",
+  });
   assert.equal(result.valid, false);
   assert.ok(result.errors.includes("released learner-pack checksum mismatch"));
+});
+
+test("missing or mismatched runtime payment mode fails closed", t => {
+  const value = fixture();
+  t.after(() => rmSync(value.root, { recursive: true, force: true }));
+  for (const paymentMode of [null, "live"]) {
+    const result = validateReleaseIntegrity(value.product, { root: value.root, paymentMode });
+    assert.equal(result.valid, false);
+    assert.ok(result.errors.includes(
+      "runtime payment mode is missing or does not match commercial authorization",
+    ));
+  }
+});
+
+test("commercial authorization tampering fails closed", t => {
+  const value = fixture();
+  t.after(() => rmSync(value.root, { recursive: true, force: true }));
+  const filename = path.join(
+    value.root,
+    "private",
+    "production_state",
+    value.authorizationFile,
+  );
+  const record = JSON.parse(readFileSync(filename, "utf8"));
+  record.seller_identity.legal_seller_name = "Tampered Seller";
+  writeJson(filename, record);
+  const result = validateReleaseIntegrity(value.product, {
+    root: value.root,
+    paymentMode: "test",
+  });
+  assert.equal(result.valid, false);
+  assert.ok(result.errors.includes("commercial authorization record integrity check failed"));
 });
 
 test("manifest and learner paths cannot escape private release storage", () => {

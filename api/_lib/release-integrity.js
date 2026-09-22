@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import path from "node:path";
+import { runtimePaymentMode } from "./payment-mode.js";
 
 const SHA256 = /^[0-9a-f]{64}$/;
 
@@ -50,7 +51,10 @@ export function hasCommercialReleaseFields(product) {
   );
 }
 
-export function validateReleaseIntegrity(product, { root = process.cwd() } = {}) {
+export function validateReleaseIntegrity(
+  product,
+  { root = process.cwd(), paymentMode = runtimePaymentMode() } = {},
+) {
   const errors = [];
   if (!hasCommercialReleaseFields(product)) {
     return { valid: false, errors: ["commercial release fields are incomplete"], manifest: null };
@@ -98,6 +102,7 @@ export function validateReleaseIntegrity(product, { root = process.cwd() } = {})
     }
   }
 
+  let authorizationRecord = null;
   if (preflight) {
     const computedPreflightHash = contentSha256(preflight, "preflight_content_sha256");
     if (
@@ -172,6 +177,115 @@ export function validateReleaseIntegrity(product, { root = process.cwd() } = {})
         errors.push(`commercial authorization ${field} does not match preflight`);
       }
     }
+
+    const authorizationRef = manifest.commercial_authorization_record || {};
+    const authorizationPath = privatePath(root, "production_state", authorizationRef.file);
+    if (!authorizationPath || !SHA256.test(authorizationRef.content_sha256 || "")) {
+      errors.push("commercial authorization record reference is invalid");
+    } else {
+      try {
+        authorizationRecord = readJson(authorizationPath);
+      } catch {
+        errors.push("commercial authorization record is missing or invalid");
+      }
+    }
+
+    if (authorizationRecord) {
+      const computedAuthorizationHash = contentSha256(
+        authorizationRecord,
+        "authorization_content_sha256",
+      );
+      if (
+        authorizationRecord.authorization_contract !==
+          "GATE_2027_EE_SET01_COMMERCIAL_AUTHORIZATION_V1" ||
+        authorizationRecord.authorization_content_sha256 !== computedAuthorizationHash ||
+        authorizationRef.content_sha256 !== computedAuthorizationHash
+      ) {
+        errors.push("commercial authorization record integrity check failed");
+      }
+      if (
+        authorizationRecord.product_id !== product.id ||
+        authorizationRecord.candidate_id !== manifest.candidate_id ||
+        authorizationRecord.status !== "AUTHORIZED_FOR_CONTROLLED_TEST_RELEASE" ||
+        authorizationRecord.test_release_authorized !== true ||
+        authorizationRecord.live_release_authorized !== false ||
+        authorizationRecord.bundle_sales_authorized !== false
+      ) {
+        errors.push("commercial authorization record scope is invalid");
+      }
+      const recordTerms = authorizationRecord.commercial_terms || {};
+      if (
+        recordTerms.currency !== manifest.currency ||
+        recordTerms.price_rupees !== manifest.price_rupees ||
+        recordTerms.payment_mode !== authorization.payment_mode ||
+        recordTerms.learner_pack_sha256 !== manifest.learner_pack?.sha256
+      ) {
+        errors.push("commercial authorization terms do not match release manifest");
+      }
+      const basis = authorizationRecord.basis || {};
+      if (
+        basis.candidate_content_sha256 !== manifest.upstream?.candidate_content_sha256 ||
+        basis.release_authorization_content_sha256 !==
+          manifest.upstream?.release_authorization_content_sha256 ||
+        basis.learner_pack_sha256 !== manifest.learner_pack?.sha256
+      ) {
+        errors.push("commercial authorization basis does not match exact RC1 artifacts");
+      }
+      const seller = authorizationRecord.seller_identity || {};
+      for (const field of [
+        "legal_seller_name",
+        "trading_name",
+        "principal_geographic_address",
+        "customer_care_email",
+        "customer_care_phone",
+        "grievance_officer_name",
+        "grievance_email",
+        "grievance_phone",
+        "business_tax_identifiers",
+      ]) {
+        if (typeof seller[field] !== "string" || !seller[field].trim()) {
+          errors.push(`commercial authorization seller field is blank: ${field}`);
+        }
+      }
+      const policy = authorizationRecord.policy_review || {};
+      if (
+        policy.privacy_reviewed !== true ||
+        policy.terms_reviewed !== true ||
+        policy.refund_reviewed !== true ||
+        policy.contact_reviewed !== true ||
+        !/^\d{4}-\d{2}-\d{2}$/.test(policy.review_date || "")
+      ) {
+        errors.push("commercial authorization policy review is incomplete");
+      }
+      const recordDecision = authorizationRecord.decision || {};
+      for (const [field, expected] of Object.entries({
+        sale_authorized: true,
+        storefront_activated: true,
+        payment_mode: "test",
+        legal_and_refund_details_reviewed: true,
+      })) {
+        if (recordDecision[field] !== expected) {
+          errors.push(`commercial authorization decision is invalid: ${field}`);
+        }
+      }
+      for (const field of ["authorized_by", "role_or_authority", "authorization_date", "signature"] ) {
+        if (typeof recordDecision[field] !== "string" || !recordDecision[field].trim()) {
+          errors.push(`commercial authorization decision field is blank: ${field}`);
+        }
+      }
+      for (const field of [
+        "sale_authorized",
+        "storefront_activated",
+        "payment_mode",
+        "authorized_by",
+        "authorization_date",
+        "legal_and_refund_details_reviewed",
+      ]) {
+        if (recordDecision[field] !== authorization[field]) {
+          errors.push(`commercial authorization record ${field} does not match manifest`);
+        }
+      }
+    }
   }
   const authorization = manifest.commercial_authorization || {};
   if (
@@ -184,6 +298,9 @@ export function validateReleaseIntegrity(product, { root = process.cwd() } = {})
     !/^\d{4}-\d{2}-\d{2}$/.test(authorization.authorization_date || "")
   ) {
     errors.push("commercial authorization is incomplete");
+  }
+  if (!paymentMode || paymentMode !== authorization.payment_mode) {
+    errors.push("runtime payment mode is missing or does not match commercial authorization");
   }
   if (manifest.release_content_sha256 !== contentSha256(manifest)) {
     errors.push("release manifest self-hash mismatch");
@@ -199,5 +316,5 @@ export function validateReleaseIntegrity(product, { root = process.cwd() } = {})
     errors.push("released learner-pack checksum mismatch");
   }
 
-  return { valid: errors.length === 0, errors, manifest };
+  return { valid: errors.length === 0, errors, manifest, authorizationRecord };
 }

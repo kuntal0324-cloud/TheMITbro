@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { hasCommercialReleaseFields, validateReleaseIntegrity } from "./release-integrity.js";
+import { assertPaymentEnvironment } from "./payment-mode.js";
 import {
   PLANNED_INDIVIDUAL_PRICE_RUPEES,
   publicOfferPlans,
@@ -71,14 +72,70 @@ export function getProduct(id) {
 }
 
 export function isPurchasable(product) {
-  return hasCommercialReleaseFields(product) && validateReleaseIntegrity(product).valid;
+  const payment = assertPaymentEnvironment();
+  return Boolean(
+    payment.valid &&
+    hasCommercialReleaseFields(product) &&
+    validateReleaseIntegrity(product, { paymentMode: payment.paymentMode }).valid
+  );
 }
 
 export function publicCatalog() {
-  return Object.values(PRODUCTS).map(({ privateFile, releaseManifest, ...product }) => ({
-    ...product,
-    purchasable: isPurchasable({ ...product, privateFile, releaseManifest }),
-  }));
+  const payment = assertPaymentEnvironment();
+  return Object.values(PRODUCTS).map(({ privateFile, releaseManifest, ...product }) => {
+    const integrity = payment.valid
+      ? validateReleaseIntegrity(
+        { ...product, privateFile, releaseManifest },
+        { paymentMode: payment.paymentMode },
+      )
+      : { valid: false, manifest: null };
+    return {
+      ...product,
+      purchasable: integrity.valid,
+      paymentMode: integrity.valid
+        ? integrity.manifest?.commercial_authorization?.payment_mode ?? null
+        : null,
+    };
+  });
+}
+
+export function publicCommerceState() {
+  const payment = assertPaymentEnvironment();
+  if (!payment.valid) {
+    return {
+      activeProductId: null,
+      paymentMode: null,
+      testOnly: false,
+      businessDetails: null,
+    };
+  }
+  for (const product of Object.values(PRODUCTS)) {
+    const integrity = validateReleaseIntegrity(product, { paymentMode: payment.paymentMode });
+    if (!integrity.valid) continue;
+    const seller = integrity.authorizationRecord?.seller_identity || {};
+    return {
+      activeProductId: product.id,
+      paymentMode: integrity.manifest.commercial_authorization.payment_mode,
+      testOnly: integrity.manifest.commercial_authorization.payment_mode === "test",
+      businessDetails: {
+        legalSellerName: seller.legal_seller_name,
+        tradingName: seller.trading_name,
+        principalGeographicAddress: seller.principal_geographic_address,
+        customerCareEmail: seller.customer_care_email,
+        customerCarePhone: seller.customer_care_phone,
+        grievanceOfficerName: seller.grievance_officer_name,
+        grievanceEmail: seller.grievance_email,
+        grievancePhone: seller.grievance_phone,
+        businessTaxIdentifiers: seller.business_tax_identifiers,
+      },
+    };
+  }
+  return {
+    activeProductId: null,
+    paymentMode: null,
+    testOnly: false,
+    businessDetails: null,
+  };
 }
 
 export function publicCommercialOffers() {

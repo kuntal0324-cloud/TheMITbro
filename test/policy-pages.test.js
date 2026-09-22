@@ -7,6 +7,7 @@ const pages = Object.fromEntries(pageNames.map(name => [
   name,
   readFileSync(new URL(`../public/${name}.html`, import.meta.url), "utf8"),
 ]));
+const legalRuntime = readFileSync(new URL("../public/legal-runtime.js", import.meta.url), "utf8");
 
 test("policy pages are responsive, dated and connected", () => {
   for (const [name, html] of Object.entries(pages)) {
@@ -15,7 +16,17 @@ test("policy pages are responsive, dated and connected", () => {
     assert.match(html, /Last updated: 21 September 2026/, name);
     assert.match(html, /mailto:themitbro\.support@gmail\.com/, name);
     assert.match(html, /checkout is disabled/i, name);
+    assert.match(html, /data-business-details/, name);
+    assert.match(html, /<script type="module" src="\/legal-runtime\.js"><\/script>/, name);
   }
+});
+
+test("verified business details can replace conservative fallback copy", () => {
+  assert.match(legalRuntime, /\/api\/catalog/);
+  assert.match(legalRuntime, /data\.commerce\?\.businessDetails/);
+  assert.match(legalRuntime, /paymentMode !== "test"/);
+  assert.match(legalRuntime, /Controlled TEST mode only/);
+  assert.doesNotMatch(legalRuntime, /innerHTML/);
 });
 
 test("policy copy does not overstate payment-data handling", () => {

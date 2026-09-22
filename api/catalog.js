@@ -1,4 +1,8 @@
-import { publicCatalog, publicCommercialOffers } from "./_lib/catalog.js";
+import {
+  publicCatalog,
+  publicCommerceState,
+  publicCommercialOffers,
+} from "./_lib/catalog.js";
 export default function handler(req,res){
  if(req.method!=="GET") return res.status(405).json({success:false,message:"Method Not Allowed"});
  res.setHeader("Cache-Control","public, max-age=60, s-maxage=300");
@@ -6,5 +10,6 @@ export default function handler(req,res){
   success:true,
   products:publicCatalog(),
   offers:publicCommercialOffers(),
+  commerce:publicCommerceState(),
  });
 }

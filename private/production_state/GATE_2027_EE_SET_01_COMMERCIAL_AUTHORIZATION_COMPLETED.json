@@ -1,0 +1,55 @@
+{
+  "authorization_contract": "GATE_2027_EE_SET01_COMMERCIAL_AUTHORIZATION_V1",
+  "product_id": "GATE_2027_EE_SET_01",
+  "candidate_id": "GATE_2027_EE_SET_01_RC1",
+  "status": "AUTHORIZED_FOR_CONTROLLED_TEST_RELEASE",
+  "test_release_authorized": true,
+  "live_release_authorized": false,
+  "bundle_sales_authorized": false,
+  "basis": {
+    "candidate_content_sha256": "3c719fe424b564ca4843b334588046be3e3ba428ce62cf58b5c615dddad2346e",
+    "release_authorization_content_sha256": "5b3a1adebf05b47d78012fe90ca328d1a20073dfaa64cd37debeabc10bb130b9",
+    "learner_pack_sha256": "f6526a7ed7a16e12339f12206a8ca4ec88c5177f159f9a276ef3f2ef4298be58"
+  },
+  "commercial_terms": {
+    "currency": "INR",
+    "price_rupees": 29,
+    "payment_mode": "test",
+    "learner_pack_sha256": "f6526a7ed7a16e12339f12206a8ca4ec88c5177f159f9a276ef3f2ef4298be58"
+  },
+  "seller_identity": {
+    "legal_seller_name": "Kuntal Das",
+    "trading_name": "TheMITbro",
+    "principal_geographic_address": "Ramchandrapur, Sankrail, Howrah, West Bengal, 711313",
+    "customer_care_email": "themitbro.support@gmail.com",
+    "customer_care_phone": "+918697227349",
+    "grievance_officer_name": "Kuntal Das - Grievance Officer",
+    "grievance_email": "themitbro.support@gmail.com",
+    "grievance_phone": "+918697227349",
+    "business_tax_identifiers": "Not applicable"
+  },
+  "policy_review": {
+    "privacy_reviewed": true,
+    "terms_reviewed": true,
+    "refund_reviewed": true,
+    "contact_reviewed": true,
+    "review_date": "2026-09-21"
+  },
+  "decision": {
+    "sale_authorized": true,
+    "storefront_activated": true,
+    "payment_mode": "test",
+    "legal_and_refund_details_reviewed": true,
+    "authorized_by": "Kuntal Das",
+    "role_or_authority": "Owner",
+    "authorization_date": "2026-09-21",
+    "signature": "Kuntal Das"
+  },
+  "attestation": "I confirm that the seller, contact and grievance details in this form are accurate; I reviewed the public privacy, terms, refund and contact pages; and I authorize only a controlled Razorpay test-mode listing for the exact GATE 2027 EE Set 01 RC1 learner pack at INR 29. I do not authorize a live payment, public sale, preorder, or 20/50-paper bundle.",
+  "attestation_confirmed": true,
+  "source_completed_pdf": {
+    "filename": "GATE_2027_EE_SET_01_COMMERCIAL_AUTHORIZATION_COMPLETED.pdf",
+    "sha256": "17d08e72876ac4f23a56a291b00636de6d5febb51684335e596311826965be8a"
+  },
+  "authorization_content_sha256": "3b4d3fca126e01759a4ba563f86eff6c446aa19894d1008a5e77acf4ab0ac9d7"
+}

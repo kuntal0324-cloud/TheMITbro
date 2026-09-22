@@ -23,19 +23,14 @@
   "commercial_decision": {
     "currency": "INR",
     "price_rupees": 29,
-    "sale_authorized": false,
-    "storefront_activated": false,
-    "payment_mode": null,
-    "authorized_by": null,
-    "authorization_date": null,
-    "legal_and_refund_details_reviewed": false
+    "sale_authorized": true,
+    "storefront_activated": true,
+    "payment_mode": "test",
+    "authorized_by": "Kuntal Das",
+    "authorization_date": "2026-09-21",
+    "legal_and_refund_details_reviewed": true
   },
-  "status": "READY_AWAITING_EXPLICIT_COMMERCIAL_DECISION",
-  "blockers": [
-    "Sale has not been explicitly authorized.",
-    "Storefront activation has not been explicitly authorized.",
-    "Payment mode has not been selected.",
-    "Legal and refund details have not been confirmed for launch."
-  ],
-  "preflight_content_sha256": "3e7c766eb5d311b5ac48b8bb026826c0a58d209da3544a64350356ece9c1e38f"
+  "status": "COMMERCIAL_RELEASE_AUTHORIZED",
+  "blockers": [],
+  "preflight_content_sha256": "1834c859fa30a6f5adce34e2c09babc2668f9e0a6cf7572862a92876e623d6c2"
 }

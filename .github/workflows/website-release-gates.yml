@@ -18,7 +18,12 @@ jobs:
         with:
           node-version: 20
           cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
       - run: npm ci
+      - run: python -m pip install -r requirements-pdf.txt
+      - run: python scripts/validate_gate_ee_set01_commercial_authorization.py
       - run: npm run check
       - run: npm audit --omit=dev --audit-level=moderate
       - run: git diff --check

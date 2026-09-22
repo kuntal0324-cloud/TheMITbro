@@ -1,5 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { getProduct, isPurchasable } from "./_lib/catalog.js";
+import { assertPaymentEnvironment } from "./_lib/payment-mode.js";
 
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "private, no-store");
@@ -21,16 +22,15 @@ export default async function handler(req, res) {
       });
     }
 
-    const keyId = process.env.RAZORPAY_KEY_ID;
-    const keySecret = process.env.RAZORPAY_KEY_SECRET;
-
-    if (!keyId || !keySecret) {
-      console.error("Missing Razorpay environment variables");
+    const paymentEnvironment = assertPaymentEnvironment();
+    if (!paymentEnvironment.valid) {
+      console.error(paymentEnvironment.error);
       return res.status(500).json({
         success: false,
         message: "Payment service configuration is unavailable."
       });
     }
+    const { keyId, keySecret, paymentMode } = paymentEnvironment;
 
     const { default: Razorpay } = await import("razorpay");
     const razorpay = new Razorpay({
@@ -54,7 +54,9 @@ export default async function handler(req, res) {
       amount: order.amount,
       currency: order.currency,
       paperId,
-      title: product.title
+      title: product.title,
+      paymentMode,
+      testOnly: paymentMode === "test"
     });
 
   } catch (err) {
