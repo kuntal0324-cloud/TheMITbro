@@ -14,6 +14,7 @@ test("storefront exposes all elements required by the catalog controller", () =>
     "published-count",
     "commerce-status",
     "commerce-reason",
+    "launch-notice",
     "payment-status",
     "development-modal",
     "modal-close",
@@ -32,5 +33,7 @@ test("browser controller uses only public API routes", () => {
   assert.match(app, /\/api\/catalog/);
   assert.match(app, /\/api\/create-order/);
   assert.match(app, /\/api\/verify-payment/);
+  assert.match(app, /TEST MODE/);
+  assert.match(app, /no real payment or public sale is authorized/i);
   assert.doesNotMatch(app, /private\/releases|releaseManifest|privateFile/);
 });

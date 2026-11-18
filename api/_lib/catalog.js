@@ -1,94 +1,12 @@
-import { readFileSync } from "node:fs";
-import { hasCommercialReleaseFields, validateReleaseIntegrity } from "./release-integrity.js";
-import {
-  PLANNED_INDIVIDUAL_PRICE_RUPEES,
-  publicOfferPlans,
-} from "./commercial-plan.js";
-
-const PROGRAMS = Object.freeze([
-  Object.freeze({
-    examFamily: "GATE",
-    examYear: 2027,
-    paperCode: "EE",
-    branch: "Electrical Engineering",
-    setCount: 50,
-  }),
-]);
-
-const registry = JSON.parse(readFileSync(
-  new URL("../../private/releases/RELEASE_REGISTRY.json", import.meta.url),
-  "utf8",
-));
-if (registry.registry_contract !== "THEMITBRO_RELEASE_REGISTRY_V1") {
-  throw new Error("Release registry contract mismatch");
-}
-const RELEASES = Object.freeze(registry.products || {});
-const upstreamCheckpoint = JSON.parse(readFileSync(
-  new URL("../../private/production_state/GATE_2027_EE_UPSTREAM_CHECKPOINT.json", import.meta.url),
-  "utf8",
-));
-if (upstreamCheckpoint.checkpoint_contract !== "GATE_2027_EE_UPSTREAM_CHECKPOINT_V4") {
-  throw new Error("Upstream checkpoint contract mismatch");
-}
-const plannedIds = new Set(PROGRAMS.flatMap(program => (
-  Array.from({ length: program.setCount }, (_, index) => (
-    `${program.examFamily}_${program.examYear}_${program.paperCode}_SET_${String(index + 1).padStart(2, "0")}`
-  ))
-)));
-for (const productId of Object.keys(RELEASES)) {
-  if (!plannedIds.has(productId)) {
-    throw new Error(`Release registry contains unknown product: ${productId}`);
-  }
-}
-
-function plannedProduct(program, setNumber) {
-  const number = String(setNumber).padStart(2, "0");
-  const id = `${program.examFamily}_${program.examYear}_${program.paperCode}_SET_${number}`;
-  const release = RELEASES[id] || {};
-  return Object.freeze({
-    id,
-    title: `${program.examFamily} ${program.examYear} ${program.paperCode} — Mock Set ${number}`,
-    ...program,
-    setNumber,
-    plannedPriceRupees: PLANNED_INDIVIDUAL_PRICE_RUPEES,
-    priceRupees: release.priceRupees ?? null,
-    status: release.status ?? "under_review",
-    releaseManifest: release.releaseManifest ?? null,
-    privateFile: release.privateFile ?? null,
-  });
-}
-
-// Add a future branch as a separate program. Its paper code, syllabus,
-// blueprint, corpus and release registry entries remain isolated from EE.
-export const PRODUCTS = Object.freeze(Object.fromEntries(
-  PROGRAMS.flatMap(program => (
-    Array.from({ length: program.setCount }, (_, index) => plannedProduct(program, index + 1))
-  )).map(product => [product.id, product]),
-));
-
-export function getProduct(id) {
-  return PRODUCTS[id] || null;
-}
-
-export function isPurchasable(product) {
-  return hasCommercialReleaseFields(product) && validateReleaseIntegrity(product).valid;
-}
-
-export function publicCatalog() {
-  return Object.values(PRODUCTS).map(({ privateFile, releaseManifest, ...product }) => ({
-    ...product,
-    purchasable: isPurchasable({ ...product, privateFile, releaseManifest }),
-  }));
-}
-
-export function publicCommercialOffers() {
-  const commerciallyReleasedSets = Object.values(PRODUCTS).filter(isPurchasable).length;
-  return publicOfferPlans({
-    contentReadySets: upstreamCheckpoint.program_totals.complete_65_question_sets,
-    commerciallyReleasedSets,
-  });
-}
-
-export const ACTIVE_PROGRAM = PROGRAMS[0];
-export const ACTIVE_PROGRAMS = PROGRAMS;
-export const RELEASE_REGISTRY = registry;
+import{hasCommercialReleaseFields,validateReleaseIntegrity}from"./release-integrity.js";import{assertPaymentEnvironment}from"./payment-mode.js";import{PLANNED_INDIVIDUAL_PRICE_RUPEES,publicOfferPlans}from"./commercial-plan.js";
+export const ACTIVE_PROGRAM=Object.freeze({examFamily:"GATE",examYear:2027,paperCode:"EE",branch:"Electrical Engineering",setCount:50});
+export const ACTIVE_PROGRAMS=Object.freeze([ACTIVE_PROGRAM]);
+const list=Array.from({length:50},(_,i)=>{const n=i+1,c=String(n).padStart(2,"0"),released=n===1;return Object.freeze({id:"GATE_2027_EE_SET_"+c,title:"GATE 2027 EE — Mock Set "+c,...ACTIVE_PROGRAM,setNumber:n,plannedPriceRupees:PLANNED_INDIVIDUAL_PRICE_RUPEES,priceRupees:released?29:null,status:released?"released":"under_review",releaseManifest:released?"release-manifest.json":null,privateFile:released?"GATE_2027_EE_SET_01.pdf":null,storagePrefix:released?"GATE_2027_EE_SET_01":null});});
+export const PRODUCTS=Object.freeze(Object.fromEntries(list.map(p=>[p.id,p])));
+export const RELEASE_REGISTRY=Object.freeze({registry_contract:"THEMITBRO_RELEASE_REGISTRY_V1",products:Object.freeze({GATE_2027_EE_SET_01:Object.freeze({status:"released",priceRupees:29,releaseManifest:"release-manifest.json",privateFile:"GATE_2027_EE_SET_01.pdf"})})});
+export function getProduct(id){return typeof id==="string"?PRODUCTS[id]||null:null;}
+export async function releaseIntegrity(p,o){if(!hasCommercialReleaseFields(p))return{valid:false,errors:["commercial release fields incomplete"],manifest:null};return validateReleaseIntegrity(p,o);}
+export async function isPurchasable(p){const e=assertPaymentEnvironment();if(!e.valid||e.paymentMode!=="test"||!hasCommercialReleaseFields(p))return false;return(await releaseIntegrity(p,{paymentMode:"test",includeLearnerPack:true})).valid;}
+export async function publicCatalog(){const e=assertPaymentEnvironment();return Promise.all(list.map(async p=>{const{privateFile,releaseManifest,storagePrefix,...safe}=p;const v=e.valid&&e.paymentMode==="test"&&p.status==="released"?await releaseIntegrity(p,{paymentMode:"test",includeLearnerPack:true}):{valid:false};return{...safe,purchasable:!!v.valid,paymentMode:v.valid?"test":null};}));}
+export async function publicCommercialOffers(){const flags=await Promise.all(list.map(isPurchasable));return publicOfferPlans({contentReadySets:1,commerciallyReleasedSets:flags.filter(Boolean).length});}
+export function publicCommerceState(){const e=assertPaymentEnvironment();return{activeProductId:null,paymentMode:e.valid?e.paymentMode:null,testOnly:e.valid&&e.paymentMode==="test",businessDetails:null};}

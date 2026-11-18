@@ -1,23 +1,5 @@
-import crypto from "crypto";
-function secret() {
-  const value = process.env.DOWNLOAD_TOKEN_SECRET;
-  if (!value || value.length < 32) throw new Error("DOWNLOAD_TOKEN_SECRET must be at least 32 characters");
-  return value;
-}
-function b64url(value) { return Buffer.from(value).toString("base64url"); }
-export function createDownloadToken({paperId,paymentId,ttlSeconds=600}) {
-  const payload = { paperId, paymentId, exp: Math.floor(Date.now()/1000)+ttlSeconds };
-  const encoded = b64url(JSON.stringify(payload));
-  const sig = crypto.createHmac("sha256",secret()).update(encoded).digest("base64url");
-  return `${encoded}.${sig}`;
-}
-export function verifyDownloadToken(token,paperId) {
-  if (typeof token !== "string" || !token.includes(".")) return null;
-  const [encoded,sig] = token.split(".");
-  const expected = crypto.createHmac("sha256",secret()).update(encoded).digest("base64url");
-  const a=Buffer.from(sig||""), b=Buffer.from(expected);
-  if (a.length!==b.length || !crypto.timingSafeEqual(a,b)) return null;
-  let payload; try { payload=JSON.parse(Buffer.from(encoded,"base64url").toString("utf8")); } catch { return null; }
-  if (payload.paperId!==paperId || !payload.paymentId || !payload.exp || payload.exp < Math.floor(Date.now()/1000)) return null;
-  return payload;
-}
+import{createHash,createHmac,timingSafeEqual}from"node:crypto";
+function secret(){const v=process.env.DOWNLOAD_TOKEN_SECRET;if(!v||v.length<32)throw Error("DOWNLOAD_TOKEN_SECRET must be at least 32 characters");return v;}
+export const hashDownloadToken=t=>createHash("sha256").update(t).digest("hex");
+export function createDownloadToken({paperId,paymentId,orderId,ttlSeconds=600}){if(!paperId||!paymentId||!orderId||!Number.isInteger(ttlSeconds)||ttlSeconds<1)throw Error("Invalid token claims");const data=Buffer.from(JSON.stringify({paperId,paymentId,orderId,exp:Math.floor(Date.now()/1000)+ttlSeconds})).toString("base64url");return data+"."+createHmac("sha256",secret()).update(data).digest("base64url");}
+export function verifyDownloadToken(token,paperId){if(typeof token!=="string")return null;const a=token.split(".");if(a.length!==2||!a[0]||!a[1])return null;const expected=createHmac("sha256",secret()).update(a[0]).digest(),actual=Buffer.from(a[1],"base64url");if(actual.length!==expected.length||!timingSafeEqual(actual,expected))return null;let p;try{p=JSON.parse(Buffer.from(a[0],"base64url").toString("utf8"));}catch{return null;}if(p.paperId!==paperId||typeof p.paymentId!=="string"||!p.paymentId||typeof p.orderId!=="string"||!p.orderId||!Number.isInteger(p.exp)||p.exp<=Math.floor(Date.now()/1000))return null;return p;}

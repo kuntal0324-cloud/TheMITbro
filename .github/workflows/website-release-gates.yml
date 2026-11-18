@@ -1,13 +1,10 @@
 name: Website release gates
-
 on:
   pull_request:
   push:
-    branches: [main]
-
+    branches: [main, pr10-private-storage-repair]
 permissions:
   contents: read
-
 jobs:
   validate:
     runs-on: ubuntu-latest

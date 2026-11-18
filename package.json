@@ -6,9 +6,13 @@
     "razorpay": "^2.9.2"
   },
   "scripts": {
-    "check": "node --check api/create-order.js && node --check api/verify-payment.js && node --check api/download.js && node --check api/catalog.js && node --check api/_lib/release-integrity.js && node --check api/_lib/commercial-plan.js && node --check public/app.js && node --test"
+    "check": "node --check api/create-order.js && node --check api/verify-payment.js && node --check api/download.js && node --check api/catalog.js && node --check api/_lib/release-integrity.js && node --check api/_lib/supabase-private.js && node --check api/_lib/download-token.js && node --check api/_lib/commercial-plan.js && node --check api/_lib/payment-mode.js && node --check public/app.js && node --check public/legal-runtime.js && node --test"
   },
   "engines": {
     "node": ">=20"
+  },
+  "overrides": {
+    "axios": "^1.20.0",
+    "follow-redirects": "^1.16.3"
   }
 }

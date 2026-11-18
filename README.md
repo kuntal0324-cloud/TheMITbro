@@ -1,16 +1,19 @@
-# TheMITbro Website — GATE 2027 EE recovery build
+# TheMITbro
 
-Static storefront + Vercel serverless API + Razorpay checkout. The only active content scope is GATE 2027 Electrical Engineering. All 50 planned sets are `under_review`; payment and download are deliberately blocked. The public catalog now displays a non-purchasable plan of ₹29 per individual paper, ₹487 for a future 20-paper pack and ₹937 for a future 50-paper pack.
+Public website source for GATE preparation materials.
 
-A paper may enter `private/releases` only after a matching immutable release manifest and named human signoff exist. Quarantined legacy files are not reachable from the catalog or API.
+## Development
 
-See `SECURITY_AND_LAUNCH.md` before public launch.
+- Node.js 20+
+- Install dependencies: `npm ci`
+- Run validation: `npm run check`
 
-Current upstream position (2026-09-21): 87 unique candidates are individually human-certified, paper-eligible and admitted to Corpus V1. Set 01 has passed whole-paper QA at 65/65, and its exact RC1 question, solution and combined learner-pack checksums have received named-human release authorization. The immutable candidate and latest supplied authorization record are staged under `private/release_candidates/`. They are deliberately not under `private/releases/`: the planned ₹29 price is recorded, but payment mode, sale authorization, legal review and storefront activation remain incomplete. One complete release-authorized set and zero commercially released sets exist; all 50 catalog products and both packs remain blocked. See `private/production_state/GATE_2027_EE_UPSTREAM_CHECKPOINT.json`, `private/production_state/GATE_2027_EE_SET_01_COMMERCIAL_PREFLIGHT.json` and `COMMERCIAL_CATALOG_PLAN.md`.
+## Release security
 
-Runtime purchase eligibility is fail-closed. A positive catalog status is insufficient: the server revalidates the commercial manifest, signed commercial-preflight state and learner-pack SHA-256 before creating an order or serving a download.
+Learner PDFs and authorization records are stored in private Supabase Storage buckets. The server API reads them using a server-only service-role credential. Never commit release artifacts, credentials, authorization records, or local secure-release inputs.
 
-## Repository boundaries
-- Website: commerce and delivery only; branch-neutral product keys support future GATE paper codes.
-- Question Bank: original content and review/release manifests.
-- Formatter v2.0: validation, paper generation and publishing.
+See [PRIVATE_RELEASE_OPERATIONS.md](PRIVATE_RELEASE_OPERATIONS.md) for the private artifact upload and server environment procedure.
+
+## Payment controls
+
+The current release is test-mode only. Live Razorpay credentials must not be configured. Checkout remains unavailable until the private manifest, preflight, authorization record, completed authorization PDF, and learner PDF all pass checksum validation.

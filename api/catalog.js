@@ -1,10 +1,2 @@
-import { publicCatalog, publicCommercialOffers } from "./_lib/catalog.js";
-export default function handler(req,res){
- if(req.method!=="GET") return res.status(405).json({success:false,message:"Method Not Allowed"});
- res.setHeader("Cache-Control","public, max-age=60, s-maxage=300");
- return res.status(200).json({
-  success:true,
-  products:publicCatalog(),
-  offers:publicCommercialOffers(),
- });
-}
+import{publicCatalog,publicCommerceState,publicCommercialOffers}from"./_lib/catalog.js";
+export default async function handler(req,res){if(req.method!=="GET")return res.status(405).json({success:false,message:"Method Not Allowed"});res.setHeader("Cache-Control","private, no-store");try{const a=await Promise.all([publicCatalog(),publicCommercialOffers()]);return res.status(200).json({success:true,products:a[0],offers:a[1],commerce:publicCommerceState()});}catch(e){console.error("catalog",e);return res.status(503).json({success:false,message:"Catalog is temporarily unavailable."});}}
