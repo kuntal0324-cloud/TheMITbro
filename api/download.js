@@ -1,18 +1,2 @@
-import fs from "fs";
-import path from "path";
-import { getProduct, isPurchasable } from "./_lib/catalog.js";
-import { verifyDownloadToken } from "./_lib/download-token.js";
-export default function handler(req,res){
- if(req.method!=="GET") return res.status(405).json({success:false,message:"Method Not Allowed"});
- try{
-  const {paperId,token}=req.query; const product=getProduct(paperId);
-  if(!isPurchasable(product)) return res.status(404).json({success:false,message:"Paper not found or not released"});
-  if(!verifyDownloadToken(token,paperId)) return res.status(403).json({success:false,message:"Download link is invalid or expired"});
-  const releaseRoot=path.resolve(process.cwd(),"private","releases");
-  const filePath=path.resolve(releaseRoot,product.privateFile);
-  if(!filePath.startsWith(`${releaseRoot}${path.sep}`)) return res.status(404).json({success:false,message:"Paper not found or not released"});
-  if(!fs.existsSync(filePath)) return res.status(404).json({success:false,message:"PDF file not found on server"});
-  res.setHeader("Content-Type","application/pdf"); res.setHeader("Content-Disposition",`attachment; filename="${path.basename(product.privateFile)}"`); res.setHeader("Content-Length",fs.statSync(filePath).size); res.setHeader("Cache-Control","private, no-store");
-  const stream=fs.createReadStream(filePath); stream.on("error",()=>res.status(500).end("Unable to download file.")); stream.pipe(res);
- }catch(err){ console.error("download",err); return res.status(500).json({success:false,message:"Unable to download file"}); }
-}
+import{getProduct}from"./_lib/catalog.js";import{hashDownloadToken,verifyDownloadToken}from"./_lib/download-token.js";import{assertPaymentEnvironment}from"./_lib/payment-mode.js";import{validateReleaseIntegrity}from"./_lib/release-integrity.js";import{consumePaymentRedemption}from"./_lib/supabase-private.js";
+export default async function handler(req,res){res.setHeader("Cache-Control","private, no-store");res.setHeader("X-Content-Type-Options","nosniff");if(req.method!=="GET")return res.status(405).json({success:false,message:"Method Not Allowed"});try{const id=typeof req.query?.paperId==="string"?req.query.paperId:"",token=typeof req.query?.token==="string"?req.query.token:"",p=getProduct(id);if(!p)return res.status(404).json({success:false,message:"Paper not found or not released"});const claims=verifyDownloadToken(token,id);if(!claims)return res.status(403).json({success:false,message:"Download link is invalid or expired"});const e=assertPaymentEnvironment();if(!e.valid||e.paymentMode!=="test")return res.status(503).json({success:false,message:"Download service is unavailable."});const v=await validateReleaseIntegrity(p,{paymentMode:"test",includeLearnerPack:true});if(!v.valid||!v.learnerBytes){console.error("download integrity failure",v.errors);return res.status(404).json({success:false,message:"Paper not found or not released"});}const used=await consumePaymentRedemption({paymentId:claims.paymentId,paperId:id,amountPaise:p.priceRupees*100,tokenSha256:hashDownloadToken(token)});if(used!==true)return res.status(403).json({success:false,message:"This download link has expired or has already been used."});res.setHeader("Content-Type","application/pdf");res.setHeader("Content-Disposition",'attachment; filename="'+p.privateFile+'"');res.setHeader("Content-Length",String(v.learnerBytes.length));return res.status(200).send(v.learnerBytes);}catch(e){console.error("download",e);return res.status(500).json({success:false,message:"Unable to download file"});}}

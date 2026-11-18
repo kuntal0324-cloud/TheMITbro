@@ -1,320 +1,60 @@
-import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
-import path from "node:path";
-import { runtimePaymentMode } from "./payment-mode.js";
-
-const SHA256 = /^[0-9a-f]{64}$/;
-
-function canonicalValue(value) {
-  if (Array.isArray(value)) return value.map(canonicalValue);
-  if (value && typeof value === "object") {
-    return Object.fromEntries(
-      Object.keys(value).sort().map(key => [key, canonicalValue(value[key])]),
-    );
-  }
-  return value;
+import{createHash}from"node:crypto";import{runtimePaymentMode}from"./payment-mode.js";import{readPrivateJson,readPrivateObject}from"./supabase-private.js";
+const HASH=/^[0-9a-f]{64}$/,PREFIX="GATE_2027_EE_SET_01";
+const canonical=v=>Array.isArray(v)?v.map(canonical):v&&typeof v==="object"?Object.fromEntries(Object.keys(v).sort().map(k=>[k,canonical(v[k])])):v;
+export const sha256=v=>createHash("sha256").update(v).digest("hex");
+export function contentSha256(v,field="release_content_sha256"){const x={...v};delete x[field];return sha256(JSON.stringify(canonical(x)));}
+function filename(v){return typeof v==="string"&&!!v.trim()&&!v.includes("/")&&!v.includes("\\")&&v!=="."&&v!=="..";}
+export function hasCommercialReleaseFields(p){return!!(p&&p.status==="released"&&filename(p.releaseManifest)&&filename(p.privateFile)&&Number.isInteger(p.priceRupees)&&p.priceRupees>0&&p.storagePrefix===PREFIX);}
+function checkAuthorization(r,m,e){
+ if(r.authorization_contract!=="GATE_2027_EE_SET01_COMMERCIAL_AUTHORIZATION_V1"||r.authorization_content_sha256!==contentSha256(r,"authorization_content_sha256")||m.commercial_authorization_record?.content_sha256!==r.authorization_content_sha256)e.push("commercial authorization record integrity check failed");
+ if(r.product_id!==m.product_id||r.candidate_id!==m.candidate_id||r.status!=="AUTHORIZED_FOR_CONTROLLED_TEST_RELEASE"||r.test_release_authorized!==true||r.live_release_authorized!==false||r.bundle_sales_authorized!==false)e.push("commercial authorization record scope is invalid");
+ const t=r.commercial_terms||{};if(t.currency!==m.currency||t.price_rupees!==m.price_rupees||t.payment_mode!=="test"||t.learner_pack_sha256!==m.learner_pack?.sha256)e.push("commercial authorization terms mismatch");
+ const b=r.basis||{};for(const f of["candidate_content_sha256","release_authorization_content_sha256"])if(b[f]!==m.upstream?.[f])e.push("commercial authorization basis mismatch");if(b.learner_pack_sha256!==m.learner_pack?.sha256)e.push("commercial authorization learner hash mismatch");
+ const s=r.seller_identity||{};for(const f of["legal_seller_name","trading_name","principal_geographic_address","customer_care_email","customer_care_phone","grievance_officer_name","grievance_email","grievance_phone","business_tax_identifiers"])if(typeof s[f]!=="string"||!s[f].trim())e.push("authorization seller field blank: "+f);
+ const p=r.policy_review||{};if(p.privacy_reviewed!==true||p.terms_reviewed!==true||p.refund_reviewed!==true||p.contact_reviewed!==true||!/^\d{4}-\d{2}-\d{2}$/.test(p.review_date||""))e.push("authorization policy review incomplete");
+ const d=r.decision||{},a=m.commercial_authorization||{};for(const f of["sale_authorized","storefront_activated","payment_mode","authorized_by","authorization_date","legal_and_refund_details_reviewed"])if(d[f]!==a[f])e.push("authorization decision mismatch: "+f);for(const f of["authorized_by","role_or_authority","authorization_date","signature"])if(typeof d[f]!=="string"||!d[f].trim())e.push("authorization decision field blank: "+f);
 }
-
-export function sha256(value) {
-  return createHash("sha256").update(value).digest("hex");
-}
-
-export function contentSha256(payload, field = "release_content_sha256") {
-  const unsigned = { ...payload };
-  delete unsigned[field];
-  return sha256(JSON.stringify(canonicalValue(unsigned)));
-}
-
-function privatePath(root, directory, filename) {
-  if (typeof filename !== "string" || !filename.trim() || path.isAbsolute(filename)) {
-    return null;
-  }
-  const base = path.resolve(root, "private", directory);
-  const resolved = path.resolve(base, filename);
-  return resolved.startsWith(`${base}${path.sep}`) ? resolved : null;
-}
-
-function readJson(filename) {
-  return JSON.parse(readFileSync(filename, "utf8"));
-}
-
-export function hasCommercialReleaseFields(product) {
-  return Boolean(
-    product &&
-    product.status === "released" &&
-    typeof product.releaseManifest === "string" &&
-    product.releaseManifest.trim() &&
-    typeof product.privateFile === "string" &&
-    product.privateFile.trim() &&
-    Number.isInteger(product.priceRupees) &&
-    product.priceRupees > 0
-  );
-}
-
-export function validateReleaseIntegrity(
-  product,
-  { root = process.cwd(), paymentMode = runtimePaymentMode() } = {},
-) {
-  const errors = [];
-  if (!hasCommercialReleaseFields(product)) {
-    return { valid: false, errors: ["commercial release fields are incomplete"], manifest: null };
-  }
-
-  const manifestPath = privatePath(root, "releases", product.releaseManifest);
-  const learnerPath = privatePath(root, "releases", product.privateFile);
-  if (!manifestPath) errors.push("release manifest path is unsafe");
-  if (!learnerPath) errors.push("learner-pack path is unsafe");
-  if (errors.length) return { valid: false, errors, manifest: null };
-
-  let manifest;
-  try {
-    manifest = readJson(manifestPath);
-  } catch {
-    return { valid: false, errors: ["release manifest is missing or invalid"], manifest: null };
-  }
-
-  if (manifest.release_contract !== "THEMITBRO_COMMERCIAL_RELEASE_V1") {
-    errors.push("release manifest contract mismatch");
-  }
-  if (manifest.product_id !== product.id || manifest.paper_id !== product.id) {
-    errors.push("release manifest product binding mismatch");
-  }
-  if (manifest.status !== "RELEASED") errors.push("release manifest status is not RELEASED");
-  if (manifest.currency !== "INR" || manifest.price_rupees !== product.priceRupees) {
-    errors.push("release manifest price/currency mismatch");
-  }
-  if (manifest.learner_pack?.file !== product.privateFile) {
-    errors.push("release manifest learner-pack path mismatch");
-  }
-  if (!SHA256.test(manifest.learner_pack?.sha256 || "")) {
-    errors.push("release manifest learner-pack checksum is invalid");
-  }
-  const preflightRef = manifest.commercial_preflight || {};
-  const preflightPath = privatePath(root, "production_state", preflightRef.file);
-  let preflight = null;
-  if (!preflightPath || !SHA256.test(preflightRef.content_sha256 || "")) {
-    errors.push("commercial preflight reference is invalid");
-  } else {
-    try {
-      preflight = readJson(preflightPath);
-    } catch {
-      errors.push("commercial preflight is missing or invalid");
-    }
-  }
-
-  let authorizationRecord = null;
-  if (preflight) {
-    const computedPreflightHash = contentSha256(preflight, "preflight_content_sha256");
-    if (
-      preflight.preflight_contract !== "GATE_2027_COMMERCIAL_PREFLIGHT_V1" ||
-      preflight.preflight_content_sha256 !== computedPreflightHash ||
-      preflightRef.content_sha256 !== computedPreflightHash
-    ) {
-      errors.push("commercial preflight integrity check failed");
-    }
-    if (
-      preflight.product_id !== product.id ||
-      preflight.candidate_id !== manifest.candidate_id
-    ) {
-      errors.push("commercial preflight product binding mismatch");
-    }
-    const requiredReadiness = {
-      official_blueprint: "PASS",
-      formatter_release_qualification: "PASS_65_OF_65",
-      whole_paper_human_qa: "PASS_65_OF_65",
-      learner_artifact_validation: "PASS",
-      exact_artifact_release_authorization: "PASS",
-    };
-    if (
-      preflight.status !== "COMMERCIAL_RELEASE_AUTHORIZED" ||
-      Object.entries(requiredReadiness).some(([field, value]) => (
-        preflight.readiness?.[field] !== value
-      ))
-    ) {
-      errors.push("commercial preflight is not release-authorized");
-    }
-
-    const decision = preflight.commercial_decision || {};
-    if (
-      decision.currency !== "INR" ||
-      decision.price_rupees !== product.priceRupees ||
-      decision.sale_authorized !== true ||
-      decision.storefront_activated !== true ||
-      !["test", "live"].includes(decision.payment_mode) ||
-      decision.legal_and_refund_details_reviewed !== true ||
-      typeof decision.authorized_by !== "string" ||
-      !decision.authorized_by.trim() ||
-      !/^\d{4}-\d{2}-\d{2}$/.test(decision.authorization_date || "")
-    ) {
-      errors.push("commercial preflight decision is incomplete");
-    }
-
-    for (const field of [
-      "candidate_content_sha256",
-      "release_authorization_content_sha256",
-    ]) {
-      if (
-        !SHA256.test(manifest.upstream?.[field] || "") ||
-        manifest.upstream[field] !== preflight.upstream?.[field]
-      ) {
-        errors.push(`release manifest ${field} does not match preflight`);
-      }
-    }
-    if (manifest.learner_pack?.sha256 !== preflight.upstream?.learner_pack_sha256) {
-      errors.push("release learner-pack checksum does not match preflight");
-    }
-
-    const authorization = manifest.commercial_authorization || {};
-    for (const field of [
-      "sale_authorized",
-      "storefront_activated",
-      "payment_mode",
-      "authorized_by",
-      "authorization_date",
-      "legal_and_refund_details_reviewed",
-    ]) {
-      if (authorization[field] !== decision[field]) {
-        errors.push(`commercial authorization ${field} does not match preflight`);
-      }
-    }
-
-    const authorizationRef = manifest.commercial_authorization_record || {};
-    const authorizationPath = privatePath(root, "production_state", authorizationRef.file);
-    if (!authorizationPath || !SHA256.test(authorizationRef.content_sha256 || "")) {
-      errors.push("commercial authorization record reference is invalid");
-    } else {
-      try {
-        authorizationRecord = readJson(authorizationPath);
-      } catch {
-        errors.push("commercial authorization record is missing or invalid");
-      }
-    }
-
-    if (authorizationRecord) {
-      const computedAuthorizationHash = contentSha256(
-        authorizationRecord,
-        "authorization_content_sha256",
-      );
-      if (
-        authorizationRecord.authorization_contract !==
-          "GATE_2027_EE_SET01_COMMERCIAL_AUTHORIZATION_V1" ||
-        authorizationRecord.authorization_content_sha256 !== computedAuthorizationHash ||
-        authorizationRef.content_sha256 !== computedAuthorizationHash
-      ) {
-        errors.push("commercial authorization record integrity check failed");
-      }
-      if (
-        authorizationRecord.product_id !== product.id ||
-        authorizationRecord.candidate_id !== manifest.candidate_id ||
-        authorizationRecord.status !== "AUTHORIZED_FOR_CONTROLLED_TEST_RELEASE" ||
-        authorizationRecord.test_release_authorized !== true ||
-        authorizationRecord.live_release_authorized !== false ||
-        authorizationRecord.bundle_sales_authorized !== false
-      ) {
-        errors.push("commercial authorization record scope is invalid");
-      }
-      const recordTerms = authorizationRecord.commercial_terms || {};
-      if (
-        recordTerms.currency !== manifest.currency ||
-        recordTerms.price_rupees !== manifest.price_rupees ||
-        recordTerms.payment_mode !== authorization.payment_mode ||
-        recordTerms.learner_pack_sha256 !== manifest.learner_pack?.sha256
-      ) {
-        errors.push("commercial authorization terms do not match release manifest");
-      }
-      const basis = authorizationRecord.basis || {};
-      if (
-        basis.candidate_content_sha256 !== manifest.upstream?.candidate_content_sha256 ||
-        basis.release_authorization_content_sha256 !==
-          manifest.upstream?.release_authorization_content_sha256 ||
-        basis.learner_pack_sha256 !== manifest.learner_pack?.sha256
-      ) {
-        errors.push("commercial authorization basis does not match exact RC1 artifacts");
-      }
-      const seller = authorizationRecord.seller_identity || {};
-      for (const field of [
-        "legal_seller_name",
-        "trading_name",
-        "principal_geographic_address",
-        "customer_care_email",
-        "customer_care_phone",
-        "grievance_officer_name",
-        "grievance_email",
-        "grievance_phone",
-        "business_tax_identifiers",
-      ]) {
-        if (typeof seller[field] !== "string" || !seller[field].trim()) {
-          errors.push(`commercial authorization seller field is blank: ${field}`);
-        }
-      }
-      const policy = authorizationRecord.policy_review || {};
-      if (
-        policy.privacy_reviewed !== true ||
-        policy.terms_reviewed !== true ||
-        policy.refund_reviewed !== true ||
-        policy.contact_reviewed !== true ||
-        !/^\d{4}-\d{2}-\d{2}$/.test(policy.review_date || "")
-      ) {
-        errors.push("commercial authorization policy review is incomplete");
-      }
-      const recordDecision = authorizationRecord.decision || {};
-      for (const [field, expected] of Object.entries({
-        sale_authorized: true,
-        storefront_activated: true,
-        payment_mode: "test",
-        legal_and_refund_details_reviewed: true,
-      })) {
-        if (recordDecision[field] !== expected) {
-          errors.push(`commercial authorization decision is invalid: ${field}`);
-        }
-      }
-      for (const field of ["authorized_by", "role_or_authority", "authorization_date", "signature"] ) {
-        if (typeof recordDecision[field] !== "string" || !recordDecision[field].trim()) {
-          errors.push(`commercial authorization decision field is blank: ${field}`);
-        }
-      }
-      for (const field of [
-        "sale_authorized",
-        "storefront_activated",
-        "payment_mode",
-        "authorized_by",
-        "authorization_date",
-        "legal_and_refund_details_reviewed",
-      ]) {
-        if (recordDecision[field] !== authorization[field]) {
-          errors.push(`commercial authorization record ${field} does not match manifest`);
-        }
-      }
-    }
-  }
-  const authorization = manifest.commercial_authorization || {};
-  if (
-    authorization.sale_authorized !== true ||
-    authorization.storefront_activated !== true ||
-    !["test", "live"].includes(authorization.payment_mode) ||
-    authorization.legal_and_refund_details_reviewed !== true ||
-    typeof authorization.authorized_by !== "string" ||
-    !authorization.authorized_by.trim() ||
-    !/^\d{4}-\d{2}-\d{2}$/.test(authorization.authorization_date || "")
-  ) {
-    errors.push("commercial authorization is incomplete");
-  }
-  if (!paymentMode || paymentMode !== authorization.payment_mode) {
-    errors.push("runtime payment mode is missing or does not match commercial authorization");
-  }
-  if (manifest.release_content_sha256 !== contentSha256(manifest)) {
-    errors.push("release manifest self-hash mismatch");
-  }
-
-  let learnerBytes;
-  try {
-    learnerBytes = readFileSync(learnerPath);
-  } catch {
-    errors.push("released learner pack is missing");
-  }
-  if (learnerBytes && sha256(learnerBytes) !== manifest.learner_pack.sha256) {
-    errors.push("released learner-pack checksum mismatch");
-  }
-
-  return { valid: errors.length === 0, errors, manifest, authorizationRecord };
+export async function validateReleaseIntegrity(product,options={}) {
+ const mode=options.paymentMode===undefined?runtimePaymentMode():options.paymentMode,includePdf=options.includeLearnerPack!==false,e=[];
+ if(!hasCommercialReleaseFields(product))return{valid:false,errors:["commercial release fields are incomplete"],manifest:null,learnerBytes:null};
+ let m;try{m=await readPrivateJson(PREFIX+"/"+product.releaseManifest);}catch{return{valid:false,errors:["private release manifest missing or invalid"],manifest:null,learnerBytes:null};}
+ if(!m||typeof m!=="object"||Array.isArray(m))return{valid:false,errors:["private release manifest schema invalid"],manifest:null,learnerBytes:null};
+ if(m.release_contract!=="THEMITBRO_COMMERCIAL_RELEASE_V1")e.push("release manifest contract mismatch");
+ if(m.product_id!==product.id||m.paper_id!==product.id)e.push("release product binding mismatch");
+ if(m.status!=="RELEASED"||m.currency!=="INR"||m.price_rupees!==product.priceRupees)e.push("release status or price mismatch");
+ if(m.learner_pack?.file!==product.privateFile||!HASH.test(m.learner_pack?.sha256||""))e.push("learner-pack reference invalid");
+ if(m.release_content_sha256!==contentSha256(m))e.push("release manifest self-hash mismatch");
+ const pr=m.commercial_preflight||{};let pre=null;
+ if(!filename(pr.file)||!HASH.test(pr.content_sha256||""))e.push("preflight reference invalid");else try{pre=await readPrivateJson(PREFIX+"/"+pr.file);}catch{e.push("private preflight missing or invalid");}
+ if(pre&& (typeof pre!=="object"||Array.isArray(pre))){e.push("preflight schema invalid");pre=null;}
+ let record=null;
+ if(pre){
+  const ph=contentSha256(pre,"preflight_content_sha256");
+  if(pre.preflight_contract!=="GATE_2027_COMMERCIAL_PREFLIGHT_V1"||pre.preflight_content_sha256!==ph||pr.content_sha256!==ph)e.push("preflight integrity check failed");
+  if(pre.product_id!==product.id||pre.candidate_id!==m.candidate_id)e.push("preflight product binding mismatch");
+  const req={official_blueprint:"PASS",formatter_release_qualification:"PASS_65_OF_65",whole_paper_human_qa:"PASS_65_OF_65",learner_artifact_validation:"PASS",exact_artifact_release_authorization:"PASS"};
+  if(pre.status!=="COMMERCIAL_RELEASE_AUTHORIZED"||Object.entries(req).some(([k,v])=>pre.readiness?.[k]!==v))e.push("preflight not release-authorized");
+  const d=pre.commercial_decision||{};
+  if(d.currency!=="INR"||d.price_rupees!==product.priceRupees||d.sale_authorized!==true||d.storefront_activated!==true||d.payment_mode!=="test"||d.legal_and_refund_details_reviewed!==true||typeof d.authorized_by!=="string"||!d.authorized_by.trim()||!/^\d{4}-\d{2}-\d{2}$/.test(d.authorization_date||""))e.push("preflight decision incomplete or not test-only");
+  for(const f of["candidate_content_sha256","release_authorization_content_sha256"])if(!HASH.test(m.upstream?.[f]||"")||m.upstream[f]!==pre.upstream?.[f])e.push("upstream hash mismatch: "+f);
+  if(m.learner_pack?.sha256!==pre.upstream?.learner_pack_sha256)e.push("learner hash differs from preflight");
+  for(const f of["sale_authorized","storefront_activated","payment_mode","authorized_by","authorization_date","legal_and_refund_details_reviewed"])if(m.commercial_authorization?.[f]!==d[f])e.push("manifest authorization mismatch: "+f);
+  const ar=m.commercial_authorization_record||{};
+  if(!filename(ar.file)||!HASH.test(ar.content_sha256||""))e.push("authorization record reference invalid");else try{
+   record=await readPrivateJson(PREFIX+"/"+ar.file);
+   if(!record||typeof record!=="object"||Array.isArray(record)){e.push("authorization record schema invalid");record=null;}
+   else{
+    checkAuthorization(record,m,e);
+    const pdf=record.source_completed_pdf||{};
+    if(!filename(pdf.filename)||!HASH.test(pdf.sha256||""))e.push("completed commercial authorization PDF reference invalid");
+    else try{const bytes=await readPrivateObject("release-authorization-private",PREFIX+"/"+pdf.filename);if(sha256(bytes)!==pdf.sha256)e.push("completed commercial authorization PDF checksum mismatch");}catch{e.push("completed commercial authorization PDF missing or unreadable");}
+   }
+  }catch{e.push("private authorization record missing or invalid");}
+ }
+ const a=m.commercial_authorization||{};
+ if(a.sale_authorized!==true||a.storefront_activated!==true||a.payment_mode!=="test"||a.legal_and_refund_details_reviewed!==true||typeof a.authorized_by!=="string"||!a.authorized_by.trim()||!/^\d{4}-\d{2}-\d{2}$/.test(a.authorization_date||""))e.push("commercial authorization incomplete or not test-only");
+ if(mode!=="test"||mode!==a.payment_mode)e.push("runtime payment mode does not match test-only authorization");
+ let learnerBytes=null;
+ if(includePdf&&HASH.test(m.learner_pack?.sha256||""))try{learnerBytes=await readPrivateObject("gate-papers-private",PREFIX+"/"+product.privateFile);if(sha256(learnerBytes)!==m.learner_pack.sha256){e.push("released learner-pack checksum mismatch");learnerBytes=null;}}catch{e.push("private learner pack missing or unreadable");}
+ return{valid:e.length===0,errors:e,manifest:m,authorizationRecord:record,learnerBytes};
 }
